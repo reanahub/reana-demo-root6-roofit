@@ -1,3 +1,4 @@
+# Environment: ROOT6 on Ubuntu:
 FROM ubuntu
 RUN apt-get update
 RUN apt-get install --yes g++ cpp gcc gfortran git dpkg-dev make binutils libx11-dev libxpm-dev libxft-dev libxext-dev \
@@ -13,3 +14,8 @@ RUN git clone --quiet http://root.cern.ch/git/root.git /code/root-v6-02-12 &&\
     make -j4 install &&\
     cd / &&\
     rm -rf /code
+
+# Code: generation and fitting macros:
+WORKDIR /code
+ADD gendata.C gendata.C
+ADD fitdata.C fitdata.C
