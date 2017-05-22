@@ -8,7 +8,7 @@ gendata:
       data: outfilename
   environment:
     environment_type: 'docker-encapsulated'
-    image: atrisovic/rootexample
+    image: reanahub/reana-demo-root6-roofit
 
 fitdata:
   process:
@@ -20,4 +20,4 @@ fitdata:
       plot: outfile
   environment:
     environment_type: 'docker-encapsulated'
-    image: atrisovic/rootexample
+    image: reanahub/reana-demo-root6-roofit
