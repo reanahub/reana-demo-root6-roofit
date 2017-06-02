@@ -1,0 +1,28 @@
+notifications:
+  email: false
+
+sudo: true
+
+language: python
+
+cache:
+  - pip
+
+python:
+  - 2.7
+
+services:
+  - docker
+
+before_install:
+  - travis_retry pip install yadage
+
+install:
+  - docker build -t reanahub/reana-demo-root6-roofit .
+
+script:
+  - yadage-validate workflow.yml | grep -q 'workflow validates'
+  - docker run -v `pwd`:/code -i -t --rm reanahub/reana-demo-root6-roofit root -b -q 'gendata.C(20000,"data.root")'
+  - ls -l data.root
+  - docker run -v `pwd`:/code -i -t --rm reanahub/reana-demo-root6-roofit root -b -q 'fitdata.C("data.root","plot.png")'
+  - ls -l plot.png
