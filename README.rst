@@ -62,7 +62,7 @@ it was slightly modified. One could run it locally as follows::
 
 This generates a final plot representing the result of our analysis:
 
-.. figure:: https://raw.githubusercontent.com/tiborsimko/reana-demo-root6-roofit/master/plot.png
+.. figure:: https://raw.githubusercontent.com/reanahub/reana-demo-root6-roofit/master/plot.png
    :alt: plot.png
    :align: center
 
