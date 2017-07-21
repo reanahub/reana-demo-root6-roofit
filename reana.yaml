@@ -1,5 +1,0 @@
-workflow: yadage
-yadage_file: workflow.yml
-yadage_toplevel: github:reanahub/reana-demo-root6-roofit
-yadage_nparallel: 1
-yadage_preset_parameters: {"events": "20000"}
