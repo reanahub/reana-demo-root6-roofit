@@ -1,0 +1,39 @@
+stages:
+  - name: gendata
+    dependencies: [init]
+    scheduler:
+      scheduler_type: 'singlestep-stage'
+      parameters:
+        events: {stages: init, output: events, unwrap: true}
+        gendata: {stages: init, output: gendata, unwrap: true}
+        outfilename: '{workdir}/data.root'
+      step:
+        process:
+          process_type: 'interpolated-script-cmd'
+          script: root -b -q '{gendata}({events},"{outfilename}")'
+        publisher:
+          publisher_type: 'frompar-pub'
+          outputmap:
+            data: outfilename
+        environment:
+          environment_type: 'docker-encapsulated'
+          image: 'reanahub/reana-env-root6'
+  - name: fitdata
+    dependencies: [gendata]
+    scheduler:
+      scheduler_type: 'singlestep-stage'
+      parameters:
+        fitdata: {stages: init, output: fitdata, unwrap: true}
+        data: {stages: gendata, output: data, unwrap: true}
+        outfile: '{workdir}/plot.png'
+      step:
+        process:
+          process_type: 'interpolated-script-cmd'
+          script: root -b -q '{fitdata}("{data}","{outfile}")'
+        publisher:
+          publisher_type: 'frompar-pub'
+          outputmap:
+            plot: outfile
+        environment:
+          environment_type: 'docker-encapsulated'
+          image: 'reanahub/reana-env-root6'

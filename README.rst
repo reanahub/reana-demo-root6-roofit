@@ -62,7 +62,7 @@ it was slightly modified. One could run it locally as follows::
 
 This generates a final plot representing the result of our analysis:
 
-.. figure:: https://raw.githubusercontent.com/reanahub/reana-demo-root6-roofit/master/plot.png
+.. figure:: https://raw.githubusercontent.com/reanahub/reana-demo-root6-roofit/master/docs/plot.png
    :alt: plot.png
    :align: center
 
@@ -73,24 +73,13 @@ reproducible manner on the REANA cloud.
 ======================
 
 First we need to take care of expressing our runtime environment in a reusable
-manner.
-
-Our example analysis was done completely within the `ROOT6
+manner. Our example analysis is completely done within the `ROOT6
 <https://root.cern.ch/>`_ analysis framework. The computing environment can be
-therefore easily encapsulated starting from the `reana-env-root6
-<https://github.com/reanahub/reana-env-root6>`_ base image (providing ROOT6) and
-adding our two macros ``gendata.C`` and ``fitdata.C`` on top. This gives the
-following ``Dockerfile``::
-
-  FROM reanahub/reana-env-root6
-  WORKDIR /code
-  ADD gendata.C gendata.C
-  ADD fitdata.C fitdata.C
-
-A container image for our analysis can be built as follows::
-
-  $ docker build -t johndoe/reana-demo-root6-roofit .
-  $ docker push johndoe/reana-demo-root6-roofit
+therefore easily encapsulated by using the upstream `reana-env-root6
+<https://github.com/reanahub/reana-env-root6>`_ base image. (See there how it
+was created.) We can actually use this base image "as is", because our two
+macros ``gendata.C`` and ``fitdata.C`` can be mounted into the container via
+code volume. We don't need to create any specially customised environment.
 
 4. Analysis workflow
 ====================
@@ -101,74 +90,287 @@ to obtain the final plot.
 As mentioned above, the analysis workflow had two stages, the generation stage
 and the fitting stage. Using the `Yadage <https://github.com/diana-hep/yadage>`_
 workflow engine, we can represent these steps in a structured YAML manner as
-follows::
+follows:
 
-  $ cat workflow.yml
-  stages:
-    - name: gendata
-      dependencies: ['init']
-      scheduler:
-        scheduler_type: singlestep-stage
-        parameters:
-          events: {stages: init, output: events, unwrap: true}
-          outfilename: '{workdir}/data.root'
-        step: {$ref: 'steps.yml#/gendata'}
-    - name: fitdata
-      dependencies: ['gendata']
-      scheduler:
-        scheduler_type: singlestep-stage
-        parameters:
-          data: {stages: gendata, output: data, unwrap: true}
-          outfile: '{workdir}/plot.png'
-        step: {$ref: 'steps.yml#/fitdata'}
+- `workflow.yaml <workflow/yadage/workflow.yaml>`_
 
-where each step is defined as::
+.. code-block:: yaml
 
-  $ cat steps.yml
-  gendata:
-    process:
-      process_type: 'interpolated-script-cmd'
-      script: root -b -q 'gendata.C({events},"{outfilename}")'
-    publisher:
-      publisher_type: 'frompar-pub'
-      outputmap:
-        data: outfilename
-    environment:
-      environment_type: 'docker-encapsulated'
-      image: johndoe/reana-demo-root6-roofit
-
-  fitdata:
-    process:
-      process_type: 'interpolated-script-cmd'
-      script: root -b -q 'fitdata.C("{data}","{outfile}")'
-    publisher:
-      publisher_type: 'frompar-pub'
-      outputmap:
-        plot: outfile
-    environment:
-      environment_type: 'docker-encapsulated'
-      image: johndoe/reana-demo-root6-roofit
+    stages:
+      - name: gendata
+        dependencies: [init]
+        scheduler:
+          scheduler_type: 'singlestep-stage'
+          parameters:
+            events: {stages: init, output: events, unwrap: true}
+            gendata: {stages: init, output: gendata, unwrap: true}
+            outfilename: '{workdir}/data.root'
+          step:
+            process:
+              process_type: 'interpolated-script-cmd'
+              script: root -b -q '{gendata}({events},"{outfilename}")'
+            publisher:
+              publisher_type: 'frompar-pub'
+              outputmap:
+                data: outfilename
+            environment:
+              environment_type: 'docker-encapsulated'
+              image: 'reanahub/reana-env-root6'
+      - name: fitdata
+        dependencies: [gendata]
+        scheduler:
+          scheduler_type: 'singlestep-stage'
+          parameters:
+            fitdata: {stages: init, output: fitdata, unwrap: true}
+            data: {stages: gendata, output: data, unwrap: true}
+            outfile: '{workdir}/plot.png'
+          step:
+            process:
+              process_type: 'interpolated-script-cmd'
+              script: root -b -q '{fitdata}("{data}","{outfile}")'
+            publisher:
+              publisher_type: 'frompar-pub'
+              outputmap:
+                plot: outfile
+            environment:
+              environment_type: 'docker-encapsulated'
+              image: 'reanahub/reana-env-root6'
 
 That's all! Our example analysis is now fully described in the REANA-compatible
 reusable analysis manner and is prepared to be run on the REANA cloud.
 
-Run the example on REANA cloud
-==============================
+Local testing with Docker
+=========================
 
-We can now install the REANA client and submit the ``reana-demo-root6-roofit``
-analysis example to run on some particular REANA cloud instance:
+Let us test whether everything works well locally in our containerised
+environment. We shall use Docker locally. Note how we mount our local
+directories ``inputs``, ``code`` and ``outputs`` into the containerised
+environment:
 
 .. code-block:: console
 
-   $ pip install reana-client
-   $ export REANA_SERVER_URL=https://reana.cern.ch
-   $ reana-client run workflow.yml
-   [INFO] Starting reana-demo-root6-roofit analysis...
-   [...]
-   [INFO] Done. You can see the results in the `output/` directory.
+    $ mkdir -p inputs
+    $ rm -rf outputs && mkdir outputs
+    $ docker run -i -t  --rm \
+                  -v `pwd`/code:/code \
+                  -v `pwd`/inputs:/inputs \
+                  -v `pwd`/outputs:/outputs \
+                  reanahub/reana-env-root6 \
+              root -b -q '/code/gendata.C(20000,"/outputs/data.root")'
+    $ docker run -i -t  --rm \
+                  -v `pwd`/code:/code \
+                  -v `pwd`/inputs:/inputs \
+                  -v `pwd`/outputs:/outputs \
+                  reanahub/reana-env-root6 \
+              root -b -q '/code/fitdata.C("/outputs/data.root","/outputs/plot.png")'
 
-**FIXME** The ``reana-client`` package is a not-yet-released work-in-progress.
-Until it is available, you can use ``reana run
-reanahub/reana-demo-rot6-roofit`` on the REANA server side, following the
-`REANA getting started
-<http://reana.readthedocs.io/en/latest/gettingstarted.html>`_ documentation.
+Let us check whether the resulting plot is the same as the one showed in the
+documentation:
+
+.. code-block:: console
+
+    $ diff outputs/plot.png  ./docs/plot.png
+
+Local testing with Yadage
+=========================
+
+Let us test whether the Yadage workflow engine execution works locally as well.
+
+Since Yadage only accepts one input directory as parameter, we are going to
+create a wrapper directory which will contain links to ``inputs`` and ``code``
+directories:
+
+.. code-block:: console
+
+    $ mkdir -p yadage-local-run/yadage-inputs
+    $ cd yadage-local-run
+    $ cp -a ../code ../inputs yadage-inputs
+
+We can now run Yadage locally as follows:
+
+.. code-block:: console
+
+    $ yadage-run . ../workflow/yadage/workflow.yaml \
+          -p events=20000 \
+          -p gendata=code/gendata.C \
+          -p fitdata=code/fitdata.C \
+          -d initdir=`pwd`/yadage-inputs
+    2018-02-19 16:01:34,297 - yadage.utils - INFO - setting up backend multiproc:auto with opts {}
+    2018-02-19 16:01:34,299 - packtivity.asyncbackends - INFO - configured pool size to 4
+    2018-02-19 16:01:34,311 - yadage.utils - INFO - local:. {u'initdir': '/home/simko/private/src/reana-demo-root6-roofit/yadage-local-run/yadage-inputs'}
+    2018-02-19 16:01:34,357 - yadage.steering_object - INFO - initializing workflow with {u'gendata': 'code/gendata.C', u'fitdata': 'code/fitdata.C', u'events': 20000}
+    2018-02-19 16:01:34,357 - adage.pollingexec - INFO - preparing adage coroutine.
+    2018-02-19 16:01:34,357 - adage - INFO - starting state loop.
+    2018-02-19 16:01:34,413 - yadage.handlers.scheduler_handlers - INFO - initializing scope from dependent tasks
+    2018-02-19 16:01:34,435 - yadage.wflowview - INFO - added node <YadageNode init DEFINED lifetime: 0:00:00.000253  runtime: None (id: 23855c9fe3d01cc568e891af020be486cb0eac17) has result: True>
+    2018-02-19 16:01:34,619 - yadage.wflowview - INFO - added node <YadageNode gendata DEFINED lifetime: 0:00:00.000127  runtime: None (id: 3075a77f855645a5556f5355ff66952a3c03b58f) has result: True>
+    2018-02-19 16:01:34,780 - yadage.wflowview - INFO - added node <YadageNode fitdata DEFINED lifetime: 0:00:00.000128  runtime: None (id: 6908bd540badcabce2d97fa095a7772a5d577210) has result: True>
+    2018-02-19 16:01:34,865 - packtivity_logger_init.step - INFO - publishing data: <TypedLeafs: {u'gendata': u'/home/simko/private/src/reana-demo-root6-roofit/yadage-local-run/yadage-inputs/code/gendata.C', u'fitdata': u'/home/simko/private/src/reana-demo-root6-roofit/yadage-local-run/yadage-inputs/code/fitdata.C', u'events': 20000}>
+    2018-02-19 16:01:34,897 - adage.node - INFO - node ready <YadageNode init SUCCESS lifetime: 0:00:00.462261  runtime: 0:00:00.031310 (id: 23855c9fe3d01cc568e891af020be486cb0eac17) has result: True>
+    2018-02-19 16:01:34,922 - packtivity_logger_gendata.step - INFO - starting file loging for topic: step
+    2018-02-19 16:01:34,981 - packtivity_logger_gendata.step - INFO - prepare pull
+    2018-02-19 16:01:39,672 - adage.node - INFO - node ready <YadageNode gendata SUCCESS lifetime: 0:00:05.053356  runtime: 0:00:04.751996 (id: 3075a77f855645a5556f5355ff66952a3c03b58f) has result: True>
+    2018-02-19 16:01:39,695 - packtivity_logger_fitdata.step - INFO - starting file loging for topic: step
+    2018-02-19 16:01:39,733 - packtivity_logger_fitdata.step - INFO - prepare pull
+    2018-02-19 16:01:45,540 - adage.node - INFO - node ready <YadageNode fitdata SUCCESS lifetime: 0:00:10.759921  runtime: 0:00:05.846398 (id: 6908bd540badcabce2d97fa095a7772a5d577210) has result: True>
+    2018-02-19 16:01:45,547 - adage.controllerutils - INFO - no nodes can be run anymore and no rules are applicable
+    2018-02-19 16:01:45,547 - adage.pollingexec - INFO - exiting main polling coroutine
+    2018-02-19 16:01:45,548 - adage - INFO - adage state loop done.
+    2018-02-19 16:01:45,548 - adage - INFO - execution valid. (in terms of execution order)
+    2018-02-19 16:01:45,555 - adage.controllerutils - INFO - no nodes can be run anymore and no rules are applicable
+    2018-02-19 16:01:45,555 - adage - INFO - workflow completed successfully.
+
+Let us check whether the resulting plot is the same as the one showed in the
+documentation:
+
+.. code-block:: console
+
+    $ diff outputs/plot.png  ./docs/plot.png
+
+Create REANA file
+=================
+
+Putting all together, we can now describe our example hello world application,
+its runtime environment, the inputs, the code, the workflow and its outputs by
+means of the following REANA specification file:
+
+.. code-block:: yaml
+
+    version: 0.1.0
+    metadata:
+      authors:
+      - Ana Trisovic <ana.trisovic@gmail.com>
+      - Lukas Heinrich <lukas.heinrich@gmail.com>
+      - Tibor Simko <tibor.simko@cern.ch>
+      title: ROOT6 and RooFit physics analysis example
+      date: 19 February 2018
+      repository: https://github.com/reanahub/reana-demo-root6-roofit/
+    code:
+      files:
+      - code/gendata.C
+      - code/fitdata.C
+    inputs:
+      parameters:
+        events: 20000
+        gendata: code/gendata.C
+        fitdata: code/fitdata.C
+    outputs:
+      files:
+      - outputs/plot.png
+    environments:
+      - type: docker
+        image: reanahub/reana-env-root6
+    workflow:
+      type: yadage
+      file: workflow/yadage/workflow.yaml
+
+Run the example on REANA cloud
+==============================
+
+We can now install the REANA client and submit the ROOT6 RooFit analysis example
+to run on some particular REANA cloud instance. We start by installing the
+client:
+
+.. code-block:: console
+
+    $ mkvirtualenv reana-client -p /usr/bin/python2.7
+    $ pip install reana-client
+
+and connect to the REANA cloud instance where we will run this example:
+
+.. code-block:: console
+
+    $ export REANA_SERVER_URL=http://192.168.99.100:32658
+    $ reana-client ping
+    [INFO] REANA Server URL ($REANA_SERVER_URL) is: http://192.168.99.100:32658
+    [INFO] Connecting to http://192.168.99.100:32658
+    [INFO] Server is running.
+
+We can now initialise workflow and upload our ROOT macros as input code:
+
+.. code-block:: console
+
+    $ reana-client workflow create
+    [INFO] REANA Server URL ($REANA_SERVER_URL) is: http://192.168.99.100:32658
+    [INFO] Validating REANA specification file: /home/simko/private/src/reana-demo-root6-roofit/reana.yaml
+    [INFO] Connecting to http://192.168.99.100:32658
+    {u'message': u'Workflow workspace created', u'workflow_id': u'3be010aa-b3b5-408c-9d16-17f0518a6995'}
+    $ export REANA_WORKON=3be010aa-b3b5-408c-9d16-17f0518a6995
+    $ reana-client workflow status
+    [INFO] REANA Server URL ($REANA_SERVER_URL) is: http://192.168.99.100:32658
+    [INFO] Workflow "3be010aa-b3b5-408c-9d16-17f0518a6995" selected
+    Name        |UUID                                |User                                |Organization|Status
+    ------------|------------------------------------|------------------------------------|------------|-------
+    nervous_shaw|3be010aa-b3b5-408c-9d16-17f0518a6995|00000000-0000-0000-0000-000000000000|default     |created
+    $ reana-client code upload gendata.C
+    [INFO] REANA Server URL ($REANA_SERVER_URL) is: http://192.168.99.100:32658
+    [INFO] Workflow "3be010aa-b3b5-408c-9d16-17f0518a6995" selected
+    Uploading ./code/gendata.C ...
+    File ./code/gendata.C was successfully uploaded.
+    $ reana-client code upload fitdata.C
+    [INFO] REANA Server URL ($REANA_SERVER_URL) is: http://192.168.99.100:32658
+    [INFO] Workflow "3be010aa-b3b5-408c-9d16-17f0518a6995" selected
+    Uploading ./code/fitdata.C ...
+    File ./code/fitdata.C was successfully uploaded.
+    $ reana-client code list
+    [INFO] REANA Server URL ($REANA_SERVER_URL) is: http://192.168.99.100:32658
+    Name     |Size|Last-Modified
+    ---------|----|--------------------------------
+    fitdata.C|1648|2018-02-19 15:12:56.966400+00:00
+    gendata.C|1937|2018-02-19 15:12:51.891938+00:00
+
+Start workflow execution and enquire about its running status:
+
+.. code-block:: console
+
+    $ reana-client workflow start
+    [INFO] REANA Server URL ($REANA_SERVER_URL) is: http://192.168.99.100:32658
+    [INFO] Workflow `3be010aa-b3b5-408c-9d16-17f0518a6995` selected
+    Workflow `3be010aa-b3b5-408c-9d16-17f0518a6995` has been started.
+    [INFO] Connecting to http://192.168.99.100:32658
+    {u'status': u'running', u'organization': u'default', u'message': u'Workflow successfully launched', u'user': u'00000000-0000-0000-0000-000000000000', u'workflow_id': u'3be010aa-b3b5-408c-9d16-17f0518a6995'}
+    Workflow `3be010aa-b3b5-408c-9d16-17f0518a6995` has been started.
+    $ reana-client workflow status
+    [INFO] REANA Server URL ($REANA_SERVER_URL) is: http://192.168.99.100:32658
+    [INFO] Workflow "3be010aa-b3b5-408c-9d16-17f0518a6995" selected
+    Name         |UUID                                |User                                |Organization|Status
+    -------------|------------------------------------|------------------------------------|------------|-------
+    naughty_gates|3be010aa-b3b5-408c-9d16-17f0518a6995|00000000-0000-0000-0000-000000000000|default     |running
+    $ reana-client workflow status
+    [INFO] REANA Server URL ($REANA_SERVER_URL) is: http://192.168.99.100:32658
+    [INFO] Workflow "3be010aa-b3b5-408c-9d16-17f0518a6995" selected
+    Name          |UUID                                |User                                |Organization|Status
+    --------------|------------------------------------|------------------------------------|------------|--------
+    pensive_carson|3be010aa-b3b5-408c-9d16-17f0518a6995|00000000-0000-0000-0000-000000000000|default     |finished
+
+After the workflow execution successfully finished, we can retrieve its output:
+
+.. code-block:: console
+
+    $ reana-client outputs list
+    [INFO] REANA Server URL ($REANA_SERVER_URL) is: http://192.168.99.100:32658
+    [INFO] Workflow "3be010aa-b3b5-408c-9d16-17f0518a6995" selected
+    Name                                 |Size  |Last-Modified
+    -------------------------------------|------|--------------------------------
+    gendata/data.root                    |153468|2018-02-19 15:17:16.154741+00:00
+    fitdata/plot.png                     |16273 |2018-02-19 15:17:16.154741+00:00
+    _yadage/yadage_snapshot_backend.json |773   |2018-02-19 15:17:16.154741+00:00
+    _yadage/yadage_snapshot_workflow.json|12426 |2018-02-19 15:17:16.154741+00:00
+    _yadage/yadage_template.json         |1817  |2018-02-19 15:17:16.154741+00:00
+    $ reana-client outputs download fitdata/plot.png
+    [INFO] REANA Server URL ($REANA_SERVER_URL) is: http://192.168.99.100:32658
+    [INFO] fitdata/plot.png binary file downloaded ... writing to ./outputs/
+    File fitdata/plot.png downloaded to ./outputs/
+
+Let us check whether the resulting plot is the same as the one showed in the
+documentation:
+
+.. code-block:: console
+
+    $ ls -l outputs/fitdata/plot.png
+    -rw-r--r-- 1 simko simko 16273 Feb 19 16:18 outputs/fitdata/plot.png
+    $ diff outputs/fitdata/plot.png ./docs/plot.png
+
+All is well.
+
+Thank you for using `REANA <http://reanahub.io/>`_ reusable analysis platform.
