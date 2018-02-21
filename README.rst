@@ -230,9 +230,9 @@ documentation:
 Create REANA file
 =================
 
-Putting all together, we can now describe our example hello world application,
-its runtime environment, the inputs, the code, the workflow and its outputs by
-means of the following REANA specification file:
+Putting all together, we can now describe our ROOT6 RooFit physics analysis
+example, its runtime environment, the inputs, the code, the workflow and its
+outputs by means of the following REANA specification file:
 
 .. code-block:: yaml
 
@@ -371,6 +371,5 @@ documentation:
     -rw-r--r-- 1 simko simko 16273 Feb 19 16:18 outputs/fitdata/plot.png
     $ diff outputs/fitdata/plot.png ./docs/plot.png
 
-All is well.
-
-Thank you for using `REANA <http://reanahub.io/>`_ reusable analysis platform.
+Thank you for using the `REANA <http://reanahub.io/>`_ reusable analysis
+platform.
