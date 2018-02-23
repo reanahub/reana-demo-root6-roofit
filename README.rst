@@ -88,53 +88,11 @@ Secondly we need to capture the analysis workflow and the commands we have run
 to obtain the final plot.
 
 As mentioned above, the analysis workflow had two stages, the generation stage
-and the fitting stage. Using the `Yadage <https://github.com/diana-hep/yadage>`_
-workflow engine, we can represent these steps in a structured YAML manner as
-follows:
-
-- `workflow.yaml <workflow/yadage/workflow.yaml>`_
-
-.. code-block:: yaml
-
-    stages:
-      - name: gendata
-        dependencies: [init]
-        scheduler:
-          scheduler_type: 'singlestep-stage'
-          parameters:
-            events: {stages: init, output: events, unwrap: true}
-            gendata: {stages: init, output: gendata, unwrap: true}
-            outfilename: '{workdir}/data.root'
-          step:
-            process:
-              process_type: 'interpolated-script-cmd'
-              script: root -b -q '{gendata}({events},"{outfilename}")'
-            publisher:
-              publisher_type: 'frompar-pub'
-              outputmap:
-                data: outfilename
-            environment:
-              environment_type: 'docker-encapsulated'
-              image: 'reanahub/reana-env-root6'
-      - name: fitdata
-        dependencies: [gendata]
-        scheduler:
-          scheduler_type: 'singlestep-stage'
-          parameters:
-            fitdata: {stages: init, output: fitdata, unwrap: true}
-            data: {stages: gendata, output: data, unwrap: true}
-            outfile: '{workdir}/plot.png'
-          step:
-            process:
-              process_type: 'interpolated-script-cmd'
-              script: root -b -q '{fitdata}("{data}","{outfile}")'
-            publisher:
-              publisher_type: 'frompar-pub'
-              outputmap:
-                plot: outfile
-            environment:
-              environment_type: 'docker-encapsulated'
-              image: 'reanahub/reana-env-root6'
+and the fitting stage. We can represent these steps in a structured YAML manner
+using the `Yadage <https://github.com/diana-hep/yadage>`_ workflow engine and `Common Workflow Language
+<http://www.commonwl.org/v1.0/>`_ specification. The corresponding
+workflow descriptions can be found under ``workflow/yadage/workflow.yaml`` and
+``workflow/cwl/workflow.cwl`` paths.
 
 That's all! Our example analysis is now fully described in the REANA-compatible
 reusable analysis manner and is prepared to be run on the REANA cloud.
@@ -174,7 +132,7 @@ documentation:
 Local testing with Yadage
 =========================
 
-Let us test whether the Yadage workflow engine execution works locally as well.
+Let us test whether the Yadage workflow engine execution works locally.
 
 Since Yadage only accepts one input directory as parameter, we are going to
 create a wrapper directory which will contain links to ``inputs`` and ``code``
@@ -219,6 +177,68 @@ We can now run Yadage locally as follows:
     2018-02-19 16:01:45,548 - adage - INFO - execution valid. (in terms of execution order)
     2018-02-19 16:01:45,555 - adage.controllerutils - INFO - no nodes can be run anymore and no rules are applicable
     2018-02-19 16:01:45,555 - adage - INFO - workflow completed successfully.
+
+Let us check whether the resulting plot is the same as the one showed in the
+documentation:
+
+.. code-block:: console
+
+    $ diff outputs/plot.png  ./docs/plot.png
+
+Local testing with CWL
+=========================
+
+Let us test whether the CWL workflow execution works locally as well.
+
+To prepare the execution, we can:
+
+- either place input files ``code/gendata.C`` and ``code/fitdata.C`` into the directory with ``input.yml``
+
+.. code-block:: console
+
+
+    $ cp code/gendata.C code/fitdata.C workflow/cwl/
+
+
+- or place ``input.yml`` to the root of the repository and edit it to correctly point to the input files:
+
+
+.. code-block:: console
+   :emphasize-lines: 7,10
+
+    $ cp workflow/cwl/input.yml .
+    $ vim input.yml
+
+    events: 20000
+    fitdata_tool:
+      class: File
+      path: code/fitdata.C
+    gendata_tool:
+      class: File
+      path: code/gendata.C
+
+
+We can now run the corresponding commands locally as follows:
+
+.. code-block:: console
+
+   // use this command, if input files were copied
+   $ cwltool --quiet --outdir="outputs" workflow/cwl/workflow.cwl workflow/cwl/input.yml
+
+   // or use this command, if input.yml was edited
+   $ cwltool --quiet --outdir="outputs" workflow/cwl/workflow.cwl input.yml
+
+    {
+        "plot": {
+            "checksum": "sha1$adc52c16836ac4cc385aab7aeddf492fe83c45e2",
+            "basename": "plot.png",
+            "location": "file:///path/to/reana-demo-root6-roofit/outputs/plot.png",
+            "path": "/path/to/reana-demo-root6-roofit/outputs/plot.png",
+            "class": "File",
+            "size": 16273
+        }
+    }
+
 
 Let us check whether the resulting plot is the same as the one showed in the
 documentation:
@@ -370,6 +390,9 @@ documentation:
     $ ls -l outputs/fitdata/plot.png
     -rw-r--r-- 1 simko simko 16273 Feb 19 16:18 outputs/fitdata/plot.png
     $ diff outputs/fitdata/plot.png ./docs/plot.png
+
+The following example uses Yadage workflow engine. If you would like to use CWL workflow engine,
+please just use ``-f reana-cwl.yaml`` with reana-client commands
 
 Thank you for using the `REANA <http://reanahub.io/>`_ reusable analysis
 platform.

@@ -4,8 +4,9 @@ cwlVersion: v1.0
 class: Workflow
 
 inputs:
-  events:
-    type: int
+  gendata_tool: File
+  fitdata_tool: File
+  events: int
 
 outputs:
   plot:
@@ -18,10 +19,12 @@ steps:
   gendata:
     run: gendata.cwl
     in:
+      gendata_tool: gendata_tool
       events: events
     out: [data]
   fitdata:
     run: fitdata.cwl
     in:
+      fitdata: fitdata_tool
       data: gendata/data
     out: [result]

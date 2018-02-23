@@ -4,9 +4,14 @@ class: CommandLineTool
 requirements:
   DockerRequirement:
     dockerPull:
-      reanahub/reana-demo-root6-roofit
+      reanahub/reana-env-root6
+  InitialWorkDirRequirement:
+    listing:
+      - $(inputs.gendata_tool)
+
 
 inputs:
+  gendata_tool: File
   events: int
   outfilename:
     type: string
@@ -17,8 +22,7 @@ baseCommand: /bin/sh
 arguments:
   - prefix: -c
     valueFrom: |
-      cd /code;
-      root -b -q 'gendata.C($(inputs.events),"$(runtime.outdir)/$(inputs.outfilename)")'
+      root -b -q '$(inputs.gendata_tool.basename)($(inputs.events),"$(runtime.outdir)/$(inputs.outfilename)")'
 
 outputs:
   data:

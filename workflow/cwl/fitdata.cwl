@@ -4,9 +4,14 @@ class: CommandLineTool
 requirements:
   DockerRequirement:
     dockerPull:
-      reanahub/reana-demo-root6-roofit
+      reanahub/reana-env-root6
+  InitialWorkDirRequirement:
+    listing:
+      - $(inputs.fitdata)
+      - $(inputs.data)
 
 inputs:
+  fitdata: File
   data: File
   outfile:
     type: string
@@ -17,8 +22,7 @@ baseCommand: /bin/sh
 arguments:
   - prefix: -c
     valueFrom: |
-      cd /code;
-      root -b -q 'fitdata.C("$(inputs.data.path)","$(runtime.outdir)/$(inputs.outfile)")'
+      root -b -q '$(inputs.fitdata.basename)("$(inputs.data.basename)","$(runtime.outdir)/$(inputs.outfile)")'
 
 outputs:
   result:
