@@ -190,43 +190,20 @@ Local testing with CWL
 
 Let us test whether the CWL workflow execution works locally as well.
 
-To prepare the execution, we can:
-
-- either place input files ``code/gendata.C`` and ``code/fitdata.C`` into the directory with ``input.yml``
-
-.. code-block:: console
-
-
-    $ cp code/gendata.C code/fitdata.C workflow/cwl/
-
-
-- or place ``input.yml`` to the root of the repository and edit it to correctly point to the input files:
-
+To prepare the execution, we are creating a working directory called ``cwl-local-run`` which will contain both
+``inputs`` and ``code`` directory content. Also, we need to copy the workflow input file:
 
 .. code-block:: console
-   :emphasize-lines: 7,10
 
-    $ cp workflow/cwl/input.yml .
-    $ vim input.yml
-
-    events: 20000
-    fitdata_tool:
-      class: File
-      path: code/fitdata.C
-    gendata_tool:
-      class: File
-      path: code/gendata.C
-
+   $ mkdir cwl-local-run
+   $ cd cwl-local-run
+   $ cp ../code/* ../workflow/cwl/input.yml .
 
 We can now run the corresponding commands locally as follows:
 
 .. code-block:: console
 
-   // use this command, if input files were copied
-   $ cwltool --quiet --outdir="outputs" workflow/cwl/workflow.cwl workflow/cwl/input.yml
-
-   // or use this command, if input.yml was edited
-   $ cwltool --quiet --outdir="outputs" workflow/cwl/workflow.cwl input.yml
+   $ cwltool --quiet --outdir="../outputs" ../workflow/cwl/workflow.cwl input.yml
 
     {
         "plot": {
