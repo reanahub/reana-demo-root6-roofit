@@ -89,13 +89,15 @@ to obtain the final plot.
 
 As mentioned above, the analysis workflow had two stages, the generation stage
 and the fitting stage. We can represent these steps in a structured YAML manner
-using the `Yadage <https://github.com/diana-hep/yadage>`_ workflow engine and `Common Workflow Language
-<http://www.commonwl.org/v1.0/>`_ specification. The corresponding
-workflow descriptions can be found under ``workflow/yadage/workflow.yaml`` and
-``workflow/cwl/workflow.cwl`` paths.
+using the `Yadage <https://github.com/diana-hep/yadage>`_ workflow engine and
+the `Common Workflow Language <http://www.commonwl.org/v1.0/>`_ specification.
+The corresponding workflow descriptions can be found here:
 
-That's all! Our example analysis is now fully described in the REANA-compatible
-reusable analysis manner and is prepared to be run on the REANA cloud.
+- `Yadage workflow definition <workflow/yadage/workflow.yaml>`_
+- `CWL workflow definition <workflow/cwl/workflow.cwl>`_
+
+Our example analysis is now fully described in the REANA-compatible reusable
+analysis manner and is prepared to be run on the REANA cloud.
 
 Local testing with Docker
 =========================
@@ -216,7 +218,6 @@ We can now run the corresponding commands locally as follows:
         }
     }
 
-
 Let us check whether the resulting plot is the same as the one showed in the
 documentation:
 
@@ -233,19 +234,19 @@ outputs by means of the following REANA specification file:
 
 .. code-block:: yaml
 
-    version: 0.1.0
+    version: 0.2.0
     metadata:
       authors:
-      - Ana Trisovic <ana.trisovic@gmail.com>
-      - Lukas Heinrich <lukas.heinrich@gmail.com>
-      - Tibor Simko <tibor.simko@cern.ch>
+       - Ana Trisovic <ana.trisovic@gmail.com>
+       - Lukas Heinrich <lukas.heinrich@gmail.com>
+       - Tibor Simko <tibor.simko@cern.ch>
       title: ROOT6 and RooFit physics analysis example
       date: 19 February 2018
       repository: https://github.com/reanahub/reana-demo-root6-roofit/
     code:
       files:
-      - code/gendata.C
-      - code/fitdata.C
+       - code/gendata.C
+       - code/fitdata.C
     inputs:
       parameters:
         events: 20000
@@ -253,7 +254,7 @@ outputs by means of the following REANA specification file:
         fitdata: code/fitdata.C
     outputs:
       files:
-      - outputs/plot.png
+       - outputs/plot.png
     environments:
       - type: docker
         image: reanahub/reana-env-root6
@@ -278,85 +279,60 @@ and connect to the REANA cloud instance where we will run this example:
 .. code-block:: console
 
     $ export REANA_SERVER_URL=http://192.168.99.100:32658
-    $ reana-client ping
-    [INFO] REANA Server URL ($REANA_SERVER_URL) is: http://192.168.99.100:32658
-    [INFO] Connecting to http://192.168.99.100:32658
-    [INFO] Server is running.
+
+If you run REANA cluster locally as well, then:
+
+.. code-block:: console
+
+   $ eval $(reana-cluster env)
+
+Let us check the connection:
+
+.. code-block:: console
+
+   $ reana-client ping
+   Server is running.
 
 We can now initialise workflow and upload our ROOT macros as input code:
 
 .. code-block:: console
 
     $ reana-client workflow create
-    [INFO] REANA Server URL ($REANA_SERVER_URL) is: http://192.168.99.100:32658
-    [INFO] Validating REANA specification file: /home/simko/private/src/reana-demo-root6-roofit/reana.yaml
-    [INFO] Connecting to http://192.168.99.100:32658
-    {u'message': u'Workflow workspace created', u'workflow_id': u'3be010aa-b3b5-408c-9d16-17f0518a6995'}
-    $ export REANA_WORKON=3be010aa-b3b5-408c-9d16-17f0518a6995
-    $ reana-client workflow status
-    [INFO] REANA Server URL ($REANA_SERVER_URL) is: http://192.168.99.100:32658
-    [INFO] Workflow "3be010aa-b3b5-408c-9d16-17f0518a6995" selected
-    Name        |UUID                                |User                                |Organization|Status
-    ------------|------------------------------------|------------------------------------|------------|-------
-    nervous_shaw|3be010aa-b3b5-408c-9d16-17f0518a6995|00000000-0000-0000-0000-000000000000|default     |created
-    $ reana-client code upload gendata.C
-    [INFO] REANA Server URL ($REANA_SERVER_URL) is: http://192.168.99.100:32658
-    [INFO] Workflow "3be010aa-b3b5-408c-9d16-17f0518a6995" selected
-    Uploading ./code/gendata.C ...
-    File ./code/gendata.C was successfully uploaded.
-    $ reana-client code upload fitdata.C
-    [INFO] REANA Server URL ($REANA_SERVER_URL) is: http://192.168.99.100:32658
-    [INFO] Workflow "3be010aa-b3b5-408c-9d16-17f0518a6995" selected
-    Uploading ./code/fitdata.C ...
-    File ./code/fitdata.C was successfully uploaded.
+    workflow.4
+    $ export REANA_WORKON=workflow.4
+    $ reana-client code upload ./code
+    /home/simko/private/project/reana/src/reana-demo-root6-roofit/code/gendata.C was uploaded successfully.
+    /home/simko/private/project/reana/src/reana-demo-root6-roofit/code/fitdata.C was uploaded successfully.
     $ reana-client code list
-    [INFO] REANA Server URL ($REANA_SERVER_URL) is: http://192.168.99.100:32658
-    Name     |Size|Last-Modified
-    ---------|----|--------------------------------
-    fitdata.C|1648|2018-02-19 15:12:56.966400+00:00
-    gendata.C|1937|2018-02-19 15:12:51.891938+00:00
+    NAME        SIZE   LAST-MODIFIED
+    fitdata.C   1648   2018-04-20 15:31:08.108119+00:00
+    gendata.C   1937   2018-04-20 15:31:08.095119+00:00
 
 Start workflow execution and enquire about its running status:
 
 .. code-block:: console
 
     $ reana-client workflow start
-    [INFO] REANA Server URL ($REANA_SERVER_URL) is: http://192.168.99.100:32658
-    [INFO] Workflow `3be010aa-b3b5-408c-9d16-17f0518a6995` selected
-    Workflow `3be010aa-b3b5-408c-9d16-17f0518a6995` has been started.
-    [INFO] Connecting to http://192.168.99.100:32658
-    {u'status': u'running', u'organization': u'default', u'message': u'Workflow successfully launched', u'user': u'00000000-0000-0000-0000-000000000000', u'workflow_id': u'3be010aa-b3b5-408c-9d16-17f0518a6995'}
-    Workflow `3be010aa-b3b5-408c-9d16-17f0518a6995` has been started.
+    workflow.4 has been started.
     $ reana-client workflow status
-    [INFO] REANA Server URL ($REANA_SERVER_URL) is: http://192.168.99.100:32658
-    [INFO] Workflow "3be010aa-b3b5-408c-9d16-17f0518a6995" selected
-    Name         |UUID                                |User                                |Organization|Status
-    -------------|------------------------------------|------------------------------------|------------|-------
-    naughty_gates|3be010aa-b3b5-408c-9d16-17f0518a6995|00000000-0000-0000-0000-000000000000|default     |running
+    NAME       RUN_NUMBER   ID                                     USER                                   ORGANIZATION   STATUS
+    workflow   4            826da1cc-ea96-4eef-9bac-85f21c954293   00000000-0000-0000-0000-000000000000   default        running
     $ reana-client workflow status
-    [INFO] REANA Server URL ($REANA_SERVER_URL) is: http://192.168.99.100:32658
-    [INFO] Workflow "3be010aa-b3b5-408c-9d16-17f0518a6995" selected
-    Name          |UUID                                |User                                |Organization|Status
-    --------------|------------------------------------|------------------------------------|------------|--------
-    pensive_carson|3be010aa-b3b5-408c-9d16-17f0518a6995|00000000-0000-0000-0000-000000000000|default     |finished
+    NAME       RUN_NUMBER   ID                                     USER                                   ORGANIZATION   STATUS
+    workflow   4            826da1cc-ea96-4eef-9bac-85f21c954293   00000000-0000-0000-0000-000000000000   default        finished
 
 After the workflow execution successfully finished, we can retrieve its output:
 
 .. code-block:: console
 
     $ reana-client outputs list
-    [INFO] REANA Server URL ($REANA_SERVER_URL) is: http://192.168.99.100:32658
-    [INFO] Workflow "3be010aa-b3b5-408c-9d16-17f0518a6995" selected
-    Name                                 |Size  |Last-Modified
-    -------------------------------------|------|--------------------------------
-    gendata/data.root                    |153468|2018-02-19 15:17:16.154741+00:00
-    fitdata/plot.png                     |16273 |2018-02-19 15:17:16.154741+00:00
-    _yadage/yadage_snapshot_backend.json |773   |2018-02-19 15:17:16.154741+00:00
-    _yadage/yadage_snapshot_workflow.json|12426 |2018-02-19 15:17:16.154741+00:00
-    _yadage/yadage_template.json         |1817  |2018-02-19 15:17:16.154741+00:00
+    NAME                                    SIZE     LAST-MODIFIED
+    gendata/data.root                       153467   2018-04-20 15:33:02.601120+00:00
+    fitdata/plot.png                        16273    2018-04-20 15:33:02.600120+00:00
+    _yadage/yadage_snapshot_backend.json    773      2018-04-20 15:33:02.600120+00:00
+    _yadage/yadage_snapshot_workflow.json   16135    2018-04-20 15:33:02.600120+00:00
+    _yadage/yadage_template.json            1843     2018-04-20 15:33:02.600120+00:00
     $ reana-client outputs download fitdata/plot.png
-    [INFO] REANA Server URL ($REANA_SERVER_URL) is: http://192.168.99.100:32658
-    [INFO] fitdata/plot.png binary file downloaded ... writing to ./outputs/
     File fitdata/plot.png downloaded to ./outputs/
 
 Let us check whether the resulting plot is the same as the one showed in the
@@ -365,11 +341,12 @@ documentation:
 .. code-block:: console
 
     $ ls -l outputs/fitdata/plot.png
-    -rw-r--r-- 1 simko simko 16273 Feb 19 16:18 outputs/fitdata/plot.png
+    -rw-r--r-- 1 simko simko 16273 Apr 20 17:33 outputs/fitdata/plot.png
     $ diff outputs/fitdata/plot.png ./docs/plot.png
 
-The following example uses Yadage workflow engine. If you would like to use CWL workflow engine,
-please just use ``-f reana-cwl.yaml`` with reana-client commands
+Note that this example demonstrated the use of the Yadage workflow engine. If
+you would like to use the CWL workflow engine, please just use ``-f
+reana-cwl.yaml`` option with the ``reana-client`` commands.
 
 Thank you for using the `REANA <http://reanahub.io/>`_ reusable analysis
 platform.
