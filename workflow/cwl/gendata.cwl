@@ -9,7 +9,6 @@ requirements:
     listing:
       - $(inputs.gendata_tool)
 
-
 inputs:
   gendata_tool: File
   events: int
@@ -24,7 +23,11 @@ arguments:
     valueFrom: |
       root -b -q '$(inputs.gendata_tool.basename)($(inputs.events),"$(runtime.outdir)/$(inputs.outfilename)")'
 
+stdout: gendata.log
+
 outputs:
+  gendata.log:
+    type: stdout
   data:
     type: File
     outputBinding:

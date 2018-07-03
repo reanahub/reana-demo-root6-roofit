@@ -13,7 +13,14 @@ outputs:
     type: File
     outputSource:
       fitdata/result
-
+  gendata.log:
+    type: File
+    outputSource:
+      gendata/gendata.log
+  fitdata.log:
+    type: File
+    outputSource:
+      fitdata/fitdata.log
 
 steps:
   gendata:
@@ -21,10 +28,10 @@ steps:
     in:
       gendata_tool: gendata_tool
       events: events
-    out: [data]
+    out: [data, gendata.log]
   fitdata:
     run: fitdata.cwl
     in:
       fitdata: fitdata_tool
       data: gendata/data
-    out: [result]
+    out: [result, fitdata.log]
