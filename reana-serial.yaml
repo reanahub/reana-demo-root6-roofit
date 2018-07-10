@@ -28,5 +28,5 @@ workflow:
     steps:
       - environment: 'reanahub/reana-env-root6'
         commands:
-        - root -b -q '../code/gendata.C(20000,"data.root")'
-        - root -b -q '../code/fitdata.C("data.root","plot.png")'
+        - root -b -q '../code/gendata.C(20000,"data.root")' | tee gendata.log
+        - root -b -q '../code/fitdata.C("data.root","plot.png")' | tee fitdata.log
