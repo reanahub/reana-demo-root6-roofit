@@ -1,6 +1,6 @@
-==============================================
- Reusable analysis example - ROOT6 and RooFit
-==============================================
+==================================
+ REANA example - ROOT6 and RooFit
+==================================
 
 .. image:: https://img.shields.io/travis/reanahub/reana-demo-root6-roofit.svg
    :target: https://travis-ci.org/reanahub/reana-demo-root6-roofit
@@ -9,103 +9,131 @@
    :target: https://gitter.im/reanahub/reana?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
 
 .. image:: https://img.shields.io/github/license/reanahub/reana-demo-root6-roofit.svg
-   :target: https://github.com/reanahub/reana-demo-root6-roofit/blob/master/COPYING
+   :target: https://github.com/reanahub/reana-demo-root6-roofit/blob/master/LICENSE
 
 About
 =====
 
-This repository provides a simplified particle physics analysis example for the
-`REANA <http://reanahub.io/>`_ reusable research data analysis plaftorm. The
-example mimics a typical particle physics analysis where the signal and
-background data is processed and fitted against a model. The example will use
-the `RooFit <https://root.cern.ch/roofit>`_ package of the `ROOT
-<https://root.cern.ch/>`_ framework.
+This `REANA <http://www.reana.io/>`_ reproducible analysis example emulates a
+typical particle physics analysis where the signal and background data is
+processed and fitted against a model. The example will use the `RooFit
+<https://root.cern.ch/roofit>`_ package of the `ROOT <https://root.cern.ch/>`_
+framework.
 
-Making a research data analysis reproducible means to provide "runnable recipes"
-addressing (1) where the input datasets are, (2) what software was used to
-analyse the data, (3) which computing environment was used to run the software,
-and (4) which workflow steps were taken to run the analysis.
+Analysis structure
+==================
 
-1. Input dataset
-================
+Making a research data analysis reproducible basically means to provide
+"runnable recipes" addressing (1) where is the input data, (2) what software was
+used to analyse the data, (3) which computing environments were used to run the
+software and (4) which computational workflow steps were taken to run the
+analysis. This will permit to instantiate the analysis on the computational
+cloud and run the analysis to obtain (5) output results.
 
-In this example the signal and background data will be generated; see below.
+1. Input data
+-------------
+
+In this example, the signal and background data will be generated; see below.
 Therefore there is no explicit input file to be taken care of.
 
 2. Analysis code
-================
+----------------
 
-Our analysis will consist of two stages. In the first stage, signal and
+The analysis will consist of two stages. In the first stage, signal and
 background are generated. In the second stage, a fit will be made for the signal
 and background.
 
 For the first generation stage, `gendata.C <gendata.C>`_ is a ROOT macro that
-generates signal and background data. The code was taken from the RooFit
-tutorial `rf502_wspacewrite.C
-<https://root.cern.ch/root/html/tutorials/roofit/rf502_wspacewrite.C.html>`_ and
-it was slightly modified. One could run it locally for 20000 events as follows::
-
-  $ root -b -q 'gendata.C(20000,"data.root")'
-
-Note that this generates a temporary ``data.root`` data file::
-
-  $ ls -l data.root
-  -rw-r--r-- 1 root root 153295 Jun  1 17:01 data.root
+generates signal and background data.
 
 For the second fitting stage, `fitdata.C <fitdata.C>`_ is a ROOT macro that
-makes a fit for the signal and the background data. The code was taken from the
-RooFit tutorial `rf503_wspaceread.C
-<https://root.cern.ch/root/html/tutorials/roofit/rf503_wspaceread.C.html>`_ and
-it was slightly modified. One could run it locally as follows::
+makes a fit for the signal and the background data.
 
-  $ root -b -q 'fitdata.C("data.root","plot.png")'
+The code was taken from the RooFit tutorial `rf502_wspacewrite.C
+<https://root.cern.ch/root/html/tutorials/roofit/rf502_wspacewrite.C.html>`_ and
+was slightly modified.
 
-This generates a final plot representing the result of our analysis:
+3. Compute environment
+----------------------
+
+In order to be able to rerun the analysis even several years in the future, we
+need to "encapsulate the current compute environment", for example to freeze the
+ROOT version our analysis is using. We shall achieve this by preparing a `Docker
+<https://www.docker.com/>`_ container image for our analysis steps.
+
+This analysis example is runs within the `ROOT6 <https://root.cern.ch/>`_
+analysis framework. The computing environment can be therefore easily
+encapsulated by using the upstream `reana-env-root6
+<https://github.com/reanahub/reana-env-root6>`_ base image. (See there how it
+was created.)
+
+We can actually use this container image "as is", because our two macros
+``gendata.C`` and ``fitdata.C`` can be "uploaded" or "mounted" into the runtime
+container. We therefore don't need to create any specially customised
+environment.
+
+4. Analysis workflow
+--------------------
+
+The analysis workflow is simple and consists of two above-mentioned stages:
+
+.. code-block:: console
+
+              START
+               |
+               |
+               V
+   +-------------------------+
+   | (1) generate data       |
+   |                         |
+   |    $ root gendata.C ... |
+   +-------------------------+
+               |
+               | data.root
+               V
+   +-------------------------+
+   | (2) fit data            |
+   |                         |
+   |    $ root fitdata.C ... |
+   +-------------------------+
+               |
+               | plot.png
+               V
+              STOP
+
+For example:
+
+.. code-block:: console
+
+    $ root -b -q 'gendata.C(20000,"data.root")'
+    $ root -b -q 'fitdata.C("data.root","plot.png")'
+    $ ls -l plot.png
+
+Note that you can also use `CWL <http://www.commonwl.org/v1.0/>`_ or `Yadage
+<https://github.com/diana-hep/yadage>`_ workflow specifications:
+
+- `workflow definition using CWL <workflow/cwl/workflow.cwl>`_
+- `workflow definition using Yadage <workflow/yadage/workflow.yaml>`_
+
+5. Output results
+-----------------
+
+The example produces a plot where the signal and background data is fitted
+against the model:
 
 .. figure:: https://raw.githubusercontent.com/reanahub/reana-demo-root6-roofit/master/docs/plot.png
    :alt: plot.png
    :align: center
 
-Let us now try to provide runnable recipes so that our analysis can be run in a
-reproducible manner on the REANA cloud.
+Local testing
+=============
 
-3. Compute environment
-======================
+*Optional*
 
-First we need to take care of expressing our runtime environment in a reusable
-manner. Our example analysis is completely done within the `ROOT6
-<https://root.cern.ch/>`_ analysis framework. The computing environment can be
-therefore easily encapsulated by using the upstream `reana-env-root6
-<https://github.com/reanahub/reana-env-root6>`_ base image. (See there how it
-was created.) We can actually use this base image "as is", because our two
-macros ``gendata.C`` and ``fitdata.C`` can be mounted into the container via
-code volume. We don't need to create any specially customised environment.
+If you would like to test the analysis locally (i.e. outside of the REANA
+platform), you can proceed as follows.
 
-4. Analysis workflow
-====================
-
-Secondly we need to capture the analysis workflow and the commands we have run
-to obtain the final plot.
-
-As mentioned above, the analysis workflow had two stages, the generation stage
-and the fitting stage. We can represent these steps in a structured YAML manner
-using the `Yadage <https://github.com/diana-hep/yadage>`_ workflow engine and
-the `Common Workflow Language <http://www.commonwl.org/v1.0/>`_ specification.
-The corresponding workflow descriptions can be found here:
-
-- `Yadage workflow definition <workflow/yadage/workflow.yaml>`_
-- `CWL workflow definition <workflow/cwl/workflow.cwl>`_
-
-Our example analysis is now fully described in the REANA-compatible reusable
-analysis manner and is prepared to be run on the REANA cloud.
-
-Local testing with Docker
-=========================
-
-Let us test whether everything works well locally in our containerised
-environment. We shall use Docker locally. Note how we mount our local
-directories ``inputs``, ``code`` and ``outputs`` into the containerised
-environment:
+Using pure Docker:
 
 .. code-block:: console
 
@@ -123,230 +151,159 @@ environment:
                   -v `pwd`/outputs:/outputs \
                   reanahub/reana-env-root6 \
               root -b -q '/code/fitdata.C("/outputs/data.root","/outputs/plot.png")'
+    $ ls -l outputs/plot.png
 
-Let us check whether the resulting plot is the same as the one showed in the
-documentation:
+In case you are using CWL workflow specification:
 
 .. code-block:: console
 
-    $ diff outputs/plot.png  ./docs/plot.png
+    $ mkdir cwl-local-run
+    $ cd cwl-local-run
+    $ cp ../code/* ../workflow/cwl/input.yml .
+    $ cwltool --quiet --outdir="../outputs" ../workflow/cwl/workflow.cwl input.yml
+    $ ls -l outputs/plot.png
 
-Local testing with Yadage
-=========================
-
-Let us test whether the Yadage workflow engine execution works locally.
-
-Since Yadage only accepts one input directory as parameter, we are going to
-create a wrapper directory which will contain links to ``inputs`` and ``code``
-directories:
+In case you are using Yadage workflow specification:
 
 .. code-block:: console
 
     $ mkdir -p yadage-local-run/yadage-inputs
     $ cd yadage-local-run
     $ cp -a ../code ../inputs yadage-inputs
-
-We can now run Yadage locally as follows:
-
-.. code-block:: console
-
     $ yadage-run . ../workflow/yadage/workflow.yaml \
           -p events=20000 \
           -p gendata=code/gendata.C \
           -p fitdata=code/fitdata.C \
           -d initdir=`pwd`/yadage-inputs
-    2018-02-19 16:01:34,297 - yadage.utils - INFO - setting up backend multiproc:auto with opts {}
-    2018-02-19 16:01:34,299 - packtivity.asyncbackends - INFO - configured pool size to 4
-    2018-02-19 16:01:34,311 - yadage.utils - INFO - local:. {u'initdir': '/home/simko/private/src/reana-demo-root6-roofit/yadage-local-run/yadage-inputs'}
-    2018-02-19 16:01:34,357 - yadage.steering_object - INFO - initializing workflow with {u'gendata': 'code/gendata.C', u'fitdata': 'code/fitdata.C', u'events': 20000}
-    2018-02-19 16:01:34,357 - adage.pollingexec - INFO - preparing adage coroutine.
-    2018-02-19 16:01:34,357 - adage - INFO - starting state loop.
-    2018-02-19 16:01:34,413 - yadage.handlers.scheduler_handlers - INFO - initializing scope from dependent tasks
-    2018-02-19 16:01:34,435 - yadage.wflowview - INFO - added node <YadageNode init DEFINED lifetime: 0:00:00.000253  runtime: None (id: 23855c9fe3d01cc568e891af020be486cb0eac17) has result: True>
-    2018-02-19 16:01:34,619 - yadage.wflowview - INFO - added node <YadageNode gendata DEFINED lifetime: 0:00:00.000127  runtime: None (id: 3075a77f855645a5556f5355ff66952a3c03b58f) has result: True>
-    2018-02-19 16:01:34,780 - yadage.wflowview - INFO - added node <YadageNode fitdata DEFINED lifetime: 0:00:00.000128  runtime: None (id: 6908bd540badcabce2d97fa095a7772a5d577210) has result: True>
-    2018-02-19 16:01:34,865 - packtivity_logger_init.step - INFO - publishing data: <TypedLeafs: {u'gendata': u'/home/simko/private/src/reana-demo-root6-roofit/yadage-local-run/yadage-inputs/code/gendata.C', u'fitdata': u'/home/simko/private/src/reana-demo-root6-roofit/yadage-local-run/yadage-inputs/code/fitdata.C', u'events': 20000}>
-    2018-02-19 16:01:34,897 - adage.node - INFO - node ready <YadageNode init SUCCESS lifetime: 0:00:00.462261  runtime: 0:00:00.031310 (id: 23855c9fe3d01cc568e891af020be486cb0eac17) has result: True>
-    2018-02-19 16:01:34,922 - packtivity_logger_gendata.step - INFO - starting file loging for topic: step
-    2018-02-19 16:01:34,981 - packtivity_logger_gendata.step - INFO - prepare pull
-    2018-02-19 16:01:39,672 - adage.node - INFO - node ready <YadageNode gendata SUCCESS lifetime: 0:00:05.053356  runtime: 0:00:04.751996 (id: 3075a77f855645a5556f5355ff66952a3c03b58f) has result: True>
-    2018-02-19 16:01:39,695 - packtivity_logger_fitdata.step - INFO - starting file loging for topic: step
-    2018-02-19 16:01:39,733 - packtivity_logger_fitdata.step - INFO - prepare pull
-    2018-02-19 16:01:45,540 - adage.node - INFO - node ready <YadageNode fitdata SUCCESS lifetime: 0:00:10.759921  runtime: 0:00:05.846398 (id: 6908bd540badcabce2d97fa095a7772a5d577210) has result: True>
-    2018-02-19 16:01:45,547 - adage.controllerutils - INFO - no nodes can be run anymore and no rules are applicable
-    2018-02-19 16:01:45,547 - adage.pollingexec - INFO - exiting main polling coroutine
-    2018-02-19 16:01:45,548 - adage - INFO - adage state loop done.
-    2018-02-19 16:01:45,548 - adage - INFO - execution valid. (in terms of execution order)
-    2018-02-19 16:01:45,555 - adage.controllerutils - INFO - no nodes can be run anymore and no rules are applicable
-    2018-02-19 16:01:45,555 - adage - INFO - workflow completed successfully.
+    $ ls -l outputs/plot.png
 
-Let us check whether the resulting plot is the same as the one showed in the
-documentation:
+Running the example on REANA cloud
+==================================
 
-.. code-block:: console
-
-    $ diff outputs/plot.png  ./docs/plot.png
-
-Local testing with CWL
-=========================
-
-Let us test whether the CWL workflow execution works locally as well.
-
-To prepare the execution, we are creating a working directory called ``cwl-local-run`` which will contain both
-``inputs`` and ``code`` directory content. Also, we need to copy the workflow input file:
-
-.. code-block:: console
-
-   $ mkdir cwl-local-run
-   $ cd cwl-local-run
-   $ cp ../code/* ../workflow/cwl/input.yml .
-
-We can now run the corresponding commands locally as follows:
-
-.. code-block:: console
-
-   $ cwltool --quiet --outdir="../outputs" ../workflow/cwl/workflow.cwl input.yml
-
-    {
-        "plot": {
-            "checksum": "sha1$adc52c16836ac4cc385aab7aeddf492fe83c45e2",
-            "basename": "plot.png",
-            "location": "file:///path/to/reana-demo-root6-roofit/outputs/plot.png",
-            "path": "/path/to/reana-demo-root6-roofit/outputs/plot.png",
-            "class": "File",
-            "size": 16273
-        }
-    }
-
-Let us check whether the resulting plot is the same as the one showed in the
-documentation:
-
-.. code-block:: console
-
-    $ diff outputs/plot.png  ./docs/plot.png
-
-Create REANA file
-=================
-
-Putting all together, we can now describe our ROOT6 RooFit physics analysis
-example, its runtime environment, the inputs, the code, the workflow and its
-outputs by means of the following REANA specification file:
+First we need to create a `reana.yaml <reana.yaml>`_ file describing the
+structure of our analysis with its inputs, the code, the runtime environment,
+the workflow and the expected outputs:
 
 .. code-block:: yaml
 
-    version: 0.2.0
-    metadata:
-      authors:
-       - Ana Trisovic <ana.trisovic@gmail.com>
-       - Lukas Heinrich <lukas.heinrich@gmail.com>
-       - Tibor Simko <tibor.simko@cern.ch>
-      title: ROOT6 and RooFit physics analysis example
-      date: 19 February 2018
-      repository: https://github.com/reanahub/reana-demo-root6-roofit/
+    version: 0.3.0
     code:
       files:
-       - code/gendata.C
-       - code/fitdata.C
+      - code/gendata.C
+      - code/fitdata.C
     inputs:
       parameters:
         events: 20000
-        gendata: code/gendata.C
-        fitdata: code/fitdata.C
     outputs:
       files:
-       - outputs/plot.png
+      - outputs/plot.png
     environments:
       - type: docker
         image: reanahub/reana-env-root6
     workflow:
-      type: yadage
-      file: workflow/yadage/workflow.yaml
+      type: serial
+      specification:
+        steps:
+          - environment: 'reanahub/reana-env-root6'
+            commands:
+            - root -b -q '../code/gendata.C(20000,"data.root")'
+            - root -b -q '../code/fitdata.C("data.root","plot.png")'
 
-Run the example on REANA cloud
-==============================
+In case you are using CWL or Yadage workflow specifications:
 
-We can now install the REANA client and submit the ROOT6 RooFit analysis example
-to run on some particular REANA cloud instance. We start by installing the
-client:
+- `reana.yaml using CWL <reana-cwl.yaml>`_
+- `reana.yaml using Yadage <reana-yadage.yaml>`_
+
+We proceed by installing the REANA command-line client:
 
 .. code-block:: console
 
-    $ mkvirtualenv reana-client -p /usr/bin/python2.7
+    $ mkvirtualenv reana-client
     $ pip install reana-client
 
-and connect to the REANA cloud instance where we will run this example:
+We should now connect the client to the remote REANA cloud where the analysis
+will run. We do this by setting the ``REANA_SERVER_URL`` environment variable:
 
 .. code-block:: console
 
-    $ export REANA_SERVER_URL=http://192.168.99.100:32658
+    $ export REANA_SERVER_URL=https://reana.cern.ch/
 
-If you run REANA cluster locally as well, then:
-
-.. code-block:: console
-
-   $ eval $(reana-cluster env)
-
-Let us check the connection:
+Note that if you `run REANA cluster locally
+<http://reana-cluster.readthedocs.io/en/latest/gettingstarted.html#deploy-reana-cluster-locally>`_
+on your laptop, you would do:
 
 .. code-block:: console
 
-   $ reana-client ping
-   Server is running.
+    $ eval $(reana-cluster env)
 
-We can now initialise workflow and upload our ROOT macros as input code:
+Let us test the client-to-server connection:
+
+.. code-block:: console
+
+    $ reana-client ping
+    Server is running.
+
+We proceed to create a new workflow instance:
 
 .. code-block:: console
 
     $ reana-client workflow create
-    workflow.4
-    $ export REANA_WORKON=workflow.4
+    workflow.1
+    $ export REANA_WORKON=workflow.1
+
+We can now seed the analysis workspace with input files:
+
+.. code-block:: console
+
     $ reana-client code upload ./code
     /home/simko/private/project/reana/src/reana-demo-root6-roofit/code/gendata.C was uploaded successfully.
     /home/simko/private/project/reana/src/reana-demo-root6-roofit/code/fitdata.C was uploaded successfully.
+
     $ reana-client code list
     NAME        SIZE   LAST-MODIFIED
-    fitdata.C   1648   2018-04-20 15:31:08.108119+00:00
-    gendata.C   1937   2018-04-20 15:31:08.095119+00:00
+    fitdata.C   1648   2018-07-12 06:33:35.783571+00:00
+    gendata.C   1937   2018-07-12 06:33:35.661573+00:00
 
-Start workflow execution and enquire about its running status:
+We can now start the workflow execution:
 
 .. code-block:: console
 
     $ reana-client workflow start
-    workflow.4 has been started.
-    $ reana-client workflow status
-    NAME       RUN_NUMBER   ID                                     USER                                   ORGANIZATION   STATUS
-    workflow   4            826da1cc-ea96-4eef-9bac-85f21c954293   00000000-0000-0000-0000-000000000000   default        running
-    $ reana-client workflow status
-    NAME       RUN_NUMBER   ID                                     USER                                   ORGANIZATION   STATUS
-    workflow   4            826da1cc-ea96-4eef-9bac-85f21c954293   00000000-0000-0000-0000-000000000000   default        finished
+    workflow.1 has been started.
 
-After the workflow execution successfully finished, we can retrieve its output:
+After several minutes the workflow should be successfully finished. Let us query
+its status:
+
+.. code-block:: console
+
+    $ reana-client workflow status
+    NAME       RUN_NUMBER   CREATED               STATUS     PROGRESS   COMMAND
+    workflow   5            2018-07-12T06:33:20   finished   2/2        root -b -q '../code/fitdata.C(\"data.root\",\"plot.png\")'
+
+We can list the output files:
 
 .. code-block:: console
 
     $ reana-client outputs list
-    NAME                                    SIZE     LAST-MODIFIED
-    gendata/data.root                       153467   2018-04-20 15:33:02.601120+00:00
-    fitdata/plot.png                        16273    2018-04-20 15:33:02.600120+00:00
-    _yadage/yadage_snapshot_backend.json    773      2018-04-20 15:33:02.600120+00:00
-    _yadage/yadage_snapshot_workflow.json   16135    2018-04-20 15:33:02.600120+00:00
-    _yadage/yadage_template.json            1843     2018-04-20 15:33:02.600120+00:00
-    $ reana-client outputs download fitdata/plot.png
-    File fitdata/plot.png downloaded to ./outputs/
+    NAME        SIZE     LAST-MODIFIED
+    plot.png    16273    2018-07-12 06:34:32.256072+00:00
+    data.root   153040   2018-07-12 06:34:32.256072+00:00
 
-Let us check whether the resulting plot is the same as the one showed in the
-documentation:
+We finish by downloading the generated plot:
 
 .. code-block:: console
 
-    $ ls -l outputs/fitdata/plot.png
-    -rw-r--r-- 1 simko simko 16273 Apr 20 17:33 outputs/fitdata/plot.png
-    $ diff outputs/fitdata/plot.png ./docs/plot.png
+    $ reana-client outputs download plot.png
+    File plot.png downloaded to ./outputs/
 
-Note that this example demonstrated the use of the Yadage workflow engine. If
-you would like to use the CWL workflow engine, please just use ``-f
-reana-cwl.yaml`` option with the ``reana-client`` commands.
+Contributors
+============
 
-Thank you for using the `REANA <http://reanahub.io/>`_ reusable analysis
-platform.
+The list of contributors in alphabetical order:
+
+- `Ana Trisovic <https://orcid.org/0000-0003-1991-0533>`_ <ana.trisovic@gmail.com>
+- `Anton Khodak <https://orcid.org/0000-0003-3263-4553>`_ <anton.khodak@ukr.net>
+- `Diego Rodriguez <https://orcid.org/0000-0003-0649-2002>`_ <diego.rodriguez@cern.ch>
+- `Dinos Kousidis <https://orcid.org/0000-0002-4914-4289>`_ <dinos.kousidis@cern.ch>
+- `Lukas Heinrich <https://orcid.org/0000-0002-4048-7584>`_ <lukas.heinrich@gmail.com>
+- `Tibor Simko <https://orcid.org/0000-0001-7202-5803>`_ <tibor.simko@cern.ch>
