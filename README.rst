@@ -206,8 +206,8 @@ the workflow and the expected outputs:
         steps:
           - environment: 'reanahub/reana-env-root6'
             commands:
-            - root -b -q '../code/gendata.C(20000,"data.root")'
-            - root -b -q '../code/fitdata.C("data.root","plot.png")'
+            - root -b -q 'code/gendata.C(20000,"data.root")'
+            - root -b -q 'code/fitdata.C("data.root","plot.png")'
 
 In case you are using CWL or Yadage workflow specifications:
 
@@ -255,14 +255,14 @@ We can now seed the analysis workspace with input files:
 
 .. code-block:: console
 
-    $ reana-client code upload ./code
-    /home/simko/private/project/reana/src/reana-demo-root6-roofit/code/gendata.C was uploaded successfully.
-    /home/simko/private/project/reana/src/reana-demo-root6-roofit/code/fitdata.C was uploaded successfully.
+    $ reana-client files upload ./code
+    File code/gendata.C was successfully uploaded.
+    File code/fitdata.C was successfully uploaded.
 
-    $ reana-client code list
+    $ reana-client files list
     NAME        SIZE   LAST-MODIFIED
-    fitdata.C   1648   2018-07-12 06:33:35.783571+00:00
-    gendata.C   1937   2018-07-12 06:33:35.661573+00:00
+    code/fitdata.C   1648     2018-07-17 19:58:44.261467+00:00
+    code/gendata.C   1937     2018-07-17 19:58:44.202467+00:00
 
 We can now start the workflow execution:
 
@@ -284,17 +284,21 @@ We can list the output files:
 
 .. code-block:: console
 
-    $ reana-client outputs list
+    $ reana-client files list
     NAME        SIZE     LAST-MODIFIED
-    plot.png    16273    2018-07-12 06:34:32.256072+00:00
-    data.root   153040   2018-07-12 06:34:32.256072+00:00
+    plot.png         16273    2018-07-17 19:59:21.166159+00:00
+    fitdata.log      5399     2018-07-17 19:59:20.655118+00:00
+    data.root        153040   2018-07-17 19:59:10.779272+00:00
+    gendata.log      2137     2018-07-17 19:59:09.436159+00:00
+    code/fitdata.C   1648     2018-07-17 19:58:44.261467+00:00
+    code/gendata.C   1937     2018-07-17 19:58:44.202467+00:00
 
 We finish by downloading the generated plot:
 
 .. code-block:: console
 
-    $ reana-client outputs download plot.png
-    File plot.png downloaded to ./outputs/
+    $ reana-client files download plot.png
+    File plot.png downloaded to File plot.png downloaded to  /home/simko/private/project/reana/src/reana-demo-root6-roofit.
 
 Contributors
 ============
