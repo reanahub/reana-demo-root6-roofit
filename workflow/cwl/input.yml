@@ -1,7 +1,7 @@
 events: 20000
 fitdata_tool:
   class: File
-  path: fitdata.C
+  path: code/fitdata.C
 gendata_tool:
   class: File
-  path: gendata.C
+  path: code/gendata.C
