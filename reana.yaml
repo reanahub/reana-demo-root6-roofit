@@ -1,14 +1,8 @@
 version: 0.3.0
-code:
-  files:
-   - code/gendata.C
-   - code/fitdata.C
 inputs:
-  parameters:
-    events: 20000
-outputs:
   files:
-   - outputs/plot.png
+    - code/gendata.C
+    - code/fitdata.C
 environments:
   - type: docker
     image: reanahub/reana-env-root6

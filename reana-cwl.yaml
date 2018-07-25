@@ -1,14 +1,7 @@
 version: 0.2.0
-code:
-  files:
-   - code/gendata.C
-   - code/fitdata.C
 inputs:
   parameters:
     input: workflow/cwl/input.yml
-outputs:
-  files:
-   - outputs/plot.png
 environments:
   - type: docker
     image: reanahub/reana-env-root6
