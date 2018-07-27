@@ -278,7 +278,7 @@ its status:
 
     $ reana-client workflow status
     NAME       RUN_NUMBER   CREATED               STATUS     PROGRESS   COMMAND
-    workflow   5            2018-07-12T06:33:20   finished   2/2        root -b -q '../code/fitdata.C(\"data.root\",\"plot.png\")'
+    workflow   1            2018-07-12T06:33:20   finished   2/2        root -b -q '../code/fitdata.C(\"data.root\",\"plot.png\")'
 
 We can list the output files:
 
