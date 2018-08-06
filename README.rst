@@ -241,7 +241,7 @@ Let us test the client-to-server connection:
 .. code-block:: console
 
     $ reana-client ping
-    Server is running.
+    Connected to https://reana.cern.ch - Server is running.
 
 We proceed to create a new workflow instance:
 
@@ -255,20 +255,20 @@ We can now seed the analysis workspace with input files:
 
 .. code-block:: console
 
-    $ reana-client files upload ./code
+    $ reana-client upload ./code
     File code/gendata.C was successfully uploaded.
     File code/fitdata.C was successfully uploaded.
 
     $ reana-client files list
-    NAME        SIZE   LAST-MODIFIED
-    code/fitdata.C   1648     2018-07-17 19:58:44.261467+00:00
-    code/gendata.C   1937     2018-07-17 19:58:44.202467+00:00
+    NAME             SIZE     LAST-MODIFIED
+    code/gendata.C   1937     2018-08-06 14:38:08.580034+00:00
+    code/fitdata.C   1648     2018-08-06 14:38:08.580034+00:00
 
 We can now start the workflow execution:
 
 .. code-block:: console
 
-    $ reana-client workflow start
+    $ reana-client start
     workflow.1 has been started.
 
 After several minutes the workflow should be successfully finished. Let us query
@@ -277,28 +277,29 @@ its status:
 .. code-block:: console
 
     $ reana-client workflow status
-    NAME       RUN_NUMBER   CREATED               STATUS     PROGRESS   COMMAND
-    workflow   5            2018-07-12T06:33:20   finished   2/2        root -b -q '../code/fitdata.C(\"data.root\",\"plot.png\")'
+    NAME       RUN_NUMBER   CREATED               STATUS     PROGRESS
+    workflow   28           2018-08-06T14:39:57   finished   2/2 
 
 We can list the output files:
 
 .. code-block:: console
 
-    $ reana-client files list
+    $ reana-client list
     NAME        SIZE     LAST-MODIFIED
-    plot.png         16273    2018-07-17 19:59:21.166159+00:00
-    fitdata.log      5399     2018-07-17 19:59:20.655118+00:00
-    data.root        153040   2018-07-17 19:59:10.779272+00:00
-    gendata.log      2137     2018-07-17 19:59:09.436159+00:00
-    code/fitdata.C   1648     2018-07-17 19:58:44.261467+00:00
-    code/gendata.C   1937     2018-07-17 19:58:44.202467+00:00
+    plot.png         16273    2018-08-06 14:40:13.842977+00:00
+    fitdata.log      5399     2018-08-06 14:40:13.711978+00:00
+    gendata.log      2137     2018-08-06 14:40:08.582034+00:00
+    data.root        153040   2018-08-06 14:40:08.582034+00:00
+    code/gendata.C   1937     2018-08-06 14:40:08.580034+00:00
+    code/fitdata.C   1648     2018-08-06 14:40:08.580034+00:00
 
 We finish by downloading the generated plot:
 
 .. code-block:: console
 
-    $ reana-client files download plot.png
-    File plot.png downloaded to File plot.png downloaded to  /home/simko/private/project/reana/src/reana-demo-root6-roofit.
+    $ reana-client download plot.png
+    File plot.png downloaded to /home/reana/reanahub/reana-demo-root6-roofit.
+
 
 Contributors
 ============
