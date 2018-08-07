@@ -222,11 +222,13 @@ We proceed by installing the REANA command-line client:
     $ pip install reana-client
 
 We should now connect the client to the remote REANA cloud where the analysis
-will run. We do this by setting the ``REANA_SERVER_URL`` environment variable:
+will run. We do this by setting the ``REANA_SERVER_URL`` environment variable
+and ``REANA_ACCESS_TOKEN`` with a valid access token:
 
 .. code-block:: console
 
     $ export REANA_SERVER_URL=https://reana.cern.ch/
+    $ export REANA_ACCESS_TOKEN=<ACCESS_TOKEN>
 
 Note that if you `run REANA cluster locally
 <http://reana-cluster.readthedocs.io/en/latest/gettingstarted.html#deploy-reana-cluster-locally>`_
@@ -234,7 +236,7 @@ on your laptop, you would do:
 
 .. code-block:: console
 
-    $ eval $(reana-cluster env)
+    $ eval $(reana-cluster env --all)
 
 Let us test the client-to-server connection:
 
