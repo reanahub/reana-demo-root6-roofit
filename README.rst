@@ -249,7 +249,7 @@ We proceed to create a new workflow instance:
 
 .. code-block:: console
 
-    $ reana-client workflow create
+    $ reana-client create
     workflow.1
     $ export REANA_WORKON=workflow.1
 
@@ -278,9 +278,9 @@ its status:
 
 .. code-block:: console
 
-    $ reana-client workflow status
+    $ reana-client status
     NAME       RUN_NUMBER   CREATED               STATUS     PROGRESS
-    workflow   28           2018-08-06T14:39:57   finished   2/2 
+    workflow   1            2018-08-06T14:39:57   finished   2/2
 
 We can list the output files:
 
