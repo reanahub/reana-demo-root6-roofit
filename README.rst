@@ -125,78 +125,24 @@ against the model:
    :alt: plot.png
    :align: center
 
-Local testing
-=============
-
-*Optional*
-
-If you would like to test the analysis locally (i.e. outside of the REANA
-platform), you can proceed as follows.
-
-Using pure Docker:
-
-.. code-block:: console
-
-    $ mkdir -p inputs
-    $ rm -rf outputs && mkdir outputs
-    $ docker run -i -t  --rm \
-                  -v `pwd`/code:/code \
-                  -v `pwd`/inputs:/inputs \
-                  -v `pwd`/outputs:/outputs \
-                  reanahub/reana-env-root6 \
-              root -b -q '/code/gendata.C(20000,"/outputs/data.root")'
-    $ docker run -i -t  --rm \
-                  -v `pwd`/code:/code \
-                  -v `pwd`/inputs:/inputs \
-                  -v `pwd`/outputs:/outputs \
-                  reanahub/reana-env-root6 \
-              root -b -q '/code/fitdata.C("/outputs/data.root","/outputs/plot.png")'
-    $ ls -l outputs/plot.png
-
-In case you are using CWL workflow specification:
-
-.. code-block:: console
-
-    $ mkdir cwl-local-run
-    $ cd cwl-local-run
-    $ cp ../code/* ../workflow/cwl/input.yml .
-    $ cwltool --quiet --outdir="../outputs" ../workflow/cwl/workflow.cwl input.yml
-    $ ls -l outputs/plot.png
-
-In case you are using Yadage workflow specification:
-
-.. code-block:: console
-
-    $ mkdir -p yadage-local-run/yadage-inputs
-    $ cd yadage-local-run
-    $ cp -a ../code ../inputs yadage-inputs
-    $ yadage-run . ../workflow/yadage/workflow.yaml \
-          -p events=20000 \
-          -p gendata=code/gendata.C \
-          -p fitdata=code/fitdata.C \
-          -d initdir=`pwd`/yadage-inputs
-    $ ls -l outputs/plot.png
-
 Running the example on REANA cloud
 ==================================
 
-First we need to create a `reana.yaml <reana.yaml>`_ file describing the
-structure of our analysis with its inputs, the code, the runtime environment,
-the workflow and the expected outputs:
+We start by creating a `reana.yaml <reana.yaml>`_ file describing the above
+analysis structure with its inputs, code, runtime environment, computational
+workflow steps and expected outputs:
 
 .. code-block:: yaml
 
     version: 0.3.0
-    code:
-      files:
-      - code/gendata.C
-      - code/fitdata.C
     inputs:
-      parameters:
-        events: 20000
-    outputs:
       files:
-      - outputs/plot.png
+        - code/gendata.C
+        - code/fitdata.C
+    parameters:
+      events: 20000
+      data: results/data.root
+      plot: results/plot.png
     environments:
       - type: docker
         image: reanahub/reana-env-root6
@@ -206,111 +152,55 @@ the workflow and the expected outputs:
         steps:
           - environment: 'reanahub/reana-env-root6'
             commands:
-            - root -b -q 'code/gendata.C(20000,"data.root")'
-            - root -b -q 'code/fitdata.C("data.root","plot.png")'
+            - mkdir -p results
+            - root -b -q 'code/gendata.C(${events},"${data}")' | tee gendata.log
+            - root -b -q 'code/fitdata.C("${data}","${plot}")' | tee fitdata.log
+    outputs:
+      files:
+        - results/plot.png
 
-In case you are using CWL or Yadage workflow specifications:
+In this example we are using a simple Serial workflow engine to represent our
+sequential computational workflow steps. Note that we can also use the CWL
+workflow specification (see `reana-cwl.yaml <reana-cwl.yaml>`_) or the Yadage
+workflow specification (see `reana-yadage.yaml <reana-yadage.yaml>`_).
 
-- `reana.yaml using CWL <reana-cwl.yaml>`_
-- `reana.yaml using Yadage <reana-yadage.yaml>`_
-
-We proceed by installing the REANA command-line client:
+We can now install the REANA command-line client, run the analysis and download the resulting plots:
 
 .. code-block:: console
 
+    $ # install REANA client
     $ mkvirtualenv reana-client
     $ pip install reana-client
-
-We should now connect the client to the remote REANA cloud where the analysis
-will run. We do this by setting the ``REANA_SERVER_URL`` environment variable
-and ``REANA_ACCESS_TOKEN`` with a valid access token:
-
-.. code-block:: console
-
+    $ # connect to some REANA cloud instance
     $ export REANA_SERVER_URL=https://reana.cern.ch/
-    $ export REANA_ACCESS_TOKEN=<ACCESS_TOKEN>
-
-Note that if you `run REANA cluster locally
-<http://reana-cluster.readthedocs.io/en/latest/gettingstarted.html#deploy-reana-cluster-locally>`_
-on your laptop, you would do:
-
-.. code-block:: console
-
-    $ eval $(reana-cluster env --all)
-
-Let us test the client-to-server connection:
-
-.. code-block:: console
-
-    $ reana-client ping
-    Connected to https://reana.cern.ch - Server is running.
-
-We proceed to create a new workflow instance:
-
-.. code-block:: console
-
-    $ reana-client create
-    workflow.1
-    $ export REANA_WORKON=workflow.1
-
-We can now seed the analysis workspace with input files:
-
-.. code-block:: console
-
+    $ export REANA_ACCESS_TOKEN=XXXXXXX
+    $ # create new workflow
+    $ reana-client create -n my-analysis
+    $ export REANA_WORKON=my-analysis
+    $ # upload input code and data to the workspace
     $ reana-client upload ./code
-    File code/gendata.C was successfully uploaded.
-    File code/fitdata.C was successfully uploaded.
-
-    $ reana-client files list
-    NAME             SIZE     LAST-MODIFIED
-    code/gendata.C   1937     2018-08-06 14:38:08.580034+00:00
-    code/fitdata.C   1648     2018-08-06 14:38:08.580034+00:00
-
-We can now start the workflow execution:
-
-.. code-block:: console
-
+    $ # start computational workflow
     $ reana-client start
-    workflow.1 has been started.
-
-After several minutes the workflow should be successfully finished. Let us query
-its status:
-
-.. code-block:: console
-
+    $ # ... should be finished in about a minute
     $ reana-client status
-    NAME       RUN_NUMBER   CREATED               STATUS     PROGRESS
-    workflow   1            2018-08-06T14:39:57   finished   2/2
-
-We can list the output files:
-
-.. code-block:: console
-
+    $ # list workspace files
     $ reana-client list
-    NAME        SIZE     LAST-MODIFIED
-    plot.png         16273    2018-08-06 14:40:13.842977+00:00
-    fitdata.log      5399     2018-08-06 14:40:13.711978+00:00
-    gendata.log      2137     2018-08-06 14:40:08.582034+00:00
-    data.root        153040   2018-08-06 14:40:08.582034+00:00
-    code/gendata.C   1937     2018-08-06 14:40:08.580034+00:00
-    code/fitdata.C   1648     2018-08-06 14:40:08.580034+00:00
+    $ # download output results
+    $ reana-client download results/plot.png
 
-We finish by downloading the generated plot:
-
-.. code-block:: console
-
-    $ reana-client download plot.png
-    File plot.png downloaded to /home/reana/reanahub/reana-demo-root6-roofit.
-
+Please see the `REANA-Client <https://reana-client.readthedocs.io/>`_
+documentation for more detailed explanation of typical ``reana-client`` usage
+scenarios.
 
 Contributors
 ============
 
 The list of contributors in alphabetical order:
 
-- `Ana Trisovic <https://orcid.org/0000-0003-1991-0533>`_ <ana.trisovic@gmail.com>
-- `Anton Khodak <https://orcid.org/0000-0003-3263-4553>`_ <anton.khodak@ukr.net>
-- `Diego Rodriguez <https://orcid.org/0000-0003-0649-2002>`_ <diego.rodriguez@cern.ch>
-- `Dinos Kousidis <https://orcid.org/0000-0002-4914-4289>`_ <dinos.kousidis@cern.ch>
-- `Lukas Heinrich <https://orcid.org/0000-0002-4048-7584>`_ <lukas.heinrich@gmail.com>
-- `Tibor Simko <https://orcid.org/0000-0001-7202-5803>`_ <tibor.simko@cern.ch>
+- `Ana Trisovic <https://orcid.org/0000-0003-1991-0533>`_
+- `Anton Khodak <https://orcid.org/0000-0003-3263-4553>`_
+- `Diego Rodriguez <https://orcid.org/0000-0003-0649-2002>`_
+- `Dinos Kousidis <https://orcid.org/0000-0002-4914-4289>`_
+- `Lukas Heinrich <https://orcid.org/0000-0002-4048-7584>`_
+- `Rokas Maciulaitis <https://orcid.org/0000-0003-1064-6967>`_
+- `Tibor Simko <https://orcid.org/0000-0001-7202-5803>`_

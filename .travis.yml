@@ -19,7 +19,12 @@ before_install:
 
 script:
   - yadage-validate workflow/yadage/workflow.yaml | grep -q 'workflow validates'
-  - docker run -i -t  --rm -v `pwd`/code:/code -v `pwd`/inputs:/inputs -v `pwd`/outputs:/outputs reanahub/reana-env-root6 root -b -q '/code/gendata.C(20000,"/outputs/data.root")'
-  - ls -l `pwd`/outputs/data.root
-  - docker run -i -t  --rm -v `pwd`/code:/code -v `pwd`/inputs:/inputs -v `pwd`/outputs:/outputs reanahub/reana-env-root6 root -b -q '/code/fitdata.C("/outputs/data.root","/outputs/plot.png")'
-  - ls -l `pwd`/outputs/plot.png
+  - docker run -i -t  --rm -v `pwd`:/workdir reanahub/reana-env-root6 bash -c "
+      cd /workdir &&
+      mkdir -p ./results &&
+      root -b -q './code/gendata.C(20000,\"./results/data.root\")'"
+  - ls -l `pwd`/results/data.root
+  - docker run -i -t  --rm -v `pwd`:/workdir reanahub/reana-env-root6 bash -c "
+       cd /workdir &&
+       root -b -q './code/fitdata.C(\"./results/data.root\",\"./results/plot.png\")'"
+  - ls -l `pwd`/results/plot.png
