@@ -143,9 +143,6 @@ workflow steps and expected outputs:
       events: 20000
       data: results/data.root
       plot: results/plot.png
-    environments:
-      - type: docker
-        image: reanahub/reana-env-root6
     workflow:
       type: serial
       specification:

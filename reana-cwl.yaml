@@ -2,9 +2,6 @@ version: 0.2.0
 inputs:
   parameters:
     input: workflow/cwl/input.yml
-environments:
-  - type: docker
-    image: reanahub/reana-env-root6
 workflow:
   type: cwl
   file: workflow/cwl/workflow.cwl

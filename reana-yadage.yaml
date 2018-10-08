@@ -4,9 +4,6 @@ inputs:
     events: 20000
     gendata: code/gendata.C
     fitdata: code/fitdata.C
-environments:
-  - type: docker
-    image: reanahub/reana-env-root6
 workflow:
   type: yadage
   file: workflow/yadage/workflow.yaml
