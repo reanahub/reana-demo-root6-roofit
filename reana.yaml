@@ -1,4 +1,4 @@
-version: 0.3.0
+version: 0.6.0
 inputs:
   files:
     - code/gendata.C
@@ -11,10 +11,14 @@ workflow:
   type: serial
   specification:
     steps:
-      - environment: 'reanahub/reana-env-root6'
+      - name: gendata
+        environment: 'reanahub/reana-env-root6'
         commands:
         - mkdir -p results
         - root -b -q 'code/gendata.C(${events},"${data}")' | tee gendata.log
+      - name: fitdata
+        environment: 'reanahub/reana-env-root6'
+        commands:
         - root -b -q 'code/fitdata.C("${data}","${plot}")' | tee fitdata.log
 outputs:
   files:

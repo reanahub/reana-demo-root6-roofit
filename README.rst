@@ -198,6 +198,7 @@ The list of contributors in alphabetical order:
 
 - `Ana Trisovic <https://orcid.org/0000-0003-1991-0533>`_
 - `Anton Khodak <https://orcid.org/0000-0003-3263-4553>`_
+- `Daniel Prelipcean <https://orcid.org/0000-0002-4855-194X>`_
 - `Diego Rodriguez <https://orcid.org/0000-0003-0649-2002>`_
 - `Dinos Kousidis <https://orcid.org/0000-0002-4914-4289>`_
 - `Lukas Heinrich <https://orcid.org/0000-0002-4048-7584>`_
