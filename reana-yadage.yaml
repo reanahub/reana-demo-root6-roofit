@@ -7,3 +7,6 @@ inputs:
 workflow:
   type: yadage
   file: workflow/yadage/workflow.yaml
+outputs:
+  files:
+    - fitdata/plot.png
