@@ -4,7 +4,7 @@ class: CommandLineTool
 requirements:
   DockerRequirement:
     dockerPull:
-      reanahub/reana-env-root6
+      reanahub/reana-env-root6:6.18.04
   InitialWorkDirRequirement:
     listing:
       - $(inputs.fitdata)

@@ -32,6 +32,7 @@ stages:
         environment:
           environment_type: 'docker-encapsulated'
           image: 'reanahub/reana-env-root6'
+          imagetag: '6.18.04'
   - name: fitdata
     dependencies: [gendata]
     scheduler:
@@ -51,3 +52,4 @@ stages:
         environment:
           environment_type: 'docker-encapsulated'
           image: 'reanahub/reana-env-root6'
+          imagetag: '6.18.04'

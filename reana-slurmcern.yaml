@@ -12,13 +12,13 @@ workflow:
   specification:
     steps:
       - name: gendata
-        environment: 'reanahub/reana-env-root6'
+        environment: 'reanahub/reana-env-root6:6.18.04'
         compute_backend: slurmcern
         commands:
         - mkdir -p results
         - root -b -q 'code/gendata.C(${events},"${data}")' | tee gendata.log
       - name: fitdata
-        environment: 'reanahub/reana-env-root6'
+        environment: 'reanahub/reana-env-root6:6.18.04'
         compute_backend: slurmcern
         commands:
         - root -b -q 'code/fitdata.C("${data}","${plot}")' | tee fitdata.log

@@ -67,10 +67,13 @@ encapsulated by using the upstream `reana-env-root6
 <https://github.com/reanahub/reana-env-root6>`_ base image. (See there how it
 was created.)
 
-We can actually use this container image "as is", because our two macros
-``gendata.C`` and ``fitdata.C`` can be "uploaded" or "mounted" into the runtime
-container. We therefore don't need to create any specially customised
-environment.
+We shall use the ROOT version 6.18.04. Note that we can actually use this
+container image "as is", because our two macros ``gendata.C`` and ``fitdata.C``
+can be "uploaded" and "mounted" into the running container at runtime. There is
+no need to compile any of the analysis source code beforehand. We can therefore
+use the ROOT 6.18.04 base image directly, without building a new container
+image specially dedicated to our analysis. The ROOT 6.18.04 base image fully
+specifies the complete analysis environment that we need for our analysis.
 
 4. Analysis workflow
 --------------------
@@ -147,7 +150,7 @@ workflow steps and expected outputs:
       type: serial
       specification:
         steps:
-          - environment: 'reanahub/reana-env-root6'
+          - environment: 'reanahub/reana-env-root6:6.18.04'
             commands:
             - mkdir -p results
             - root -b -q 'code/gendata.C(${events},"${data}")' | tee gendata.log
