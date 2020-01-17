@@ -24,14 +24,6 @@ outputs:
     type: File
     outputSource:
       fitdata/result
-  gendata.log:
-    type: File
-    outputSource:
-      gendata/gendata.log
-  fitdata.log:
-    type: File
-    outputSource:
-      fitdata/fitdata.log
 
 steps:
   gendata:
@@ -39,10 +31,10 @@ steps:
     in:
       gendata_tool: gendata_tool
       events: events
-    out: [data, gendata.log]
+    out: [data]
   fitdata:
     run: fitdata.cwl
     in:
       fitdata: fitdata_tool
       data: gendata/data
-    out: [result, fitdata.log]
+    out: [result]

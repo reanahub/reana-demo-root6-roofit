@@ -153,8 +153,8 @@ workflow steps and expected outputs:
           - environment: 'reanahub/reana-env-root6:6.18.04'
             commands:
             - mkdir -p results
-            - root -b -q 'code/gendata.C(${events},"${data}")' | tee gendata.log
-            - root -b -q 'code/fitdata.C("${data}","${plot}")' | tee fitdata.log
+            - root -b -q 'code/gendata.C(${events},"${data}")'
+            - root -b -q 'code/fitdata.C("${data}","${plot}")
     outputs:
       files:
         - results/plot.png

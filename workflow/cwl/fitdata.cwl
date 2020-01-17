@@ -24,11 +24,7 @@ arguments:
     valueFrom: |
       root -b -q '$(inputs.fitdata.basename)("$(inputs.data.basename)","$(runtime.outdir)/$(inputs.outfile)")'
 
-stdout: fitdata.log
-
 outputs:
-  fitdata.log:
-    type: stdout
   result:
     type: File
     outputBinding:
