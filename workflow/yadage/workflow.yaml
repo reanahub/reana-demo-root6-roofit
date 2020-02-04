@@ -18,8 +18,8 @@ stages:
     scheduler:
       scheduler_type: 'singlestep-stage'
       parameters:
-        events: {stages: init, output: events, unwrap: true}
-        gendata: {stages: init, output: gendata, unwrap: true}
+        events: {step: init, output: events}
+        gendata: {step: init, output: gendata}
         outfilename: '{workdir}/data.root'
       step:
         process:
@@ -38,8 +38,8 @@ stages:
     scheduler:
       scheduler_type: 'singlestep-stage'
       parameters:
-        fitdata: {stages: init, output: fitdata, unwrap: true}
-        data: {stages: gendata, output: data, unwrap: true}
+        fitdata: {step: init, output: fitdata}
+        data: {step: gendata, output: data}
         outfile: '{workdir}/plot.png'
       step:
         process:
