@@ -137,24 +137,27 @@ workflow steps and expected outputs:
 
 .. code-block:: yaml
 
-    version: 0.3.0
+    version: 0.6.0
     inputs:
       files:
         - code/gendata.C
         - code/fitdata.C
-    parameters:
-      events: 20000
-      data: results/data.root
-      plot: results/plot.png
+      parameters:
+        events: 20000
+        data: results/data.root
+        plot: results/plot.png
     workflow:
       type: serial
       specification:
         steps:
-          - environment: 'reanahub/reana-env-root6:6.18.04'
+          - name: gendata
+            environment: 'reanahub/reana-env-root6:6.18.04'
             commands:
-            - mkdir -p results
-            - root -b -q 'code/gendata.C(${events},"${data}")'
-            - root -b -q 'code/fitdata.C("${data}","${plot}")
+            - mkdir -p results && root -b -q 'code/gendata.C(${events},"${data}")'
+          - name: fitdata
+            environment: 'reanahub/reana-env-root6:6.18.04'
+            commands:
+            - root -b -q 'code/fitdata.C("${data}","${plot}")'
     outputs:
       files:
         - results/plot.png
