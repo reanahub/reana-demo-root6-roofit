@@ -1,5 +1,8 @@
-version: 0.2.0
+version: 0.6.0
 inputs:
+  files:
+    - code/gendata.C
+    - code/fitdata.C
   parameters:
     events: 20000
     gendata: code/gendata.C
