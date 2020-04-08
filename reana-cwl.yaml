@@ -3,6 +3,8 @@ inputs:
   files:
     - code/gendata.C
     - code/fitdata.C
+  directories:
+    - workflow/cwl
   parameters:
     input: workflow/cwl/input.yml
 workflow:

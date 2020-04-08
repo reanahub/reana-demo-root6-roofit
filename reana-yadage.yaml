@@ -3,6 +3,8 @@ inputs:
   files:
     - code/gendata.C
     - code/fitdata.C
+  directories:
+    - workflow/yadage
   parameters:
     events: 20000
     gendata: code/gendata.C
