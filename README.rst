@@ -2,8 +2,8 @@
  REANA example - ROOT6 and RooFit
 ==================================
 
-.. image:: https://img.shields.io/travis/reanahub/reana-demo-root6-roofit.svg
-   :target: https://travis-ci.org/reanahub/reana-demo-root6-roofit
+.. image:: https://github.com/reanahub/reana-demo-root6-roofit/workflows/CI/badge.svg
+   :target: https://github.com/reanahub/reana-demo-root6-roofit/actions
 
 .. image:: https://badges.gitter.im/Join%20Chat.svg
    :target: https://gitter.im/reanahub/reana?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
