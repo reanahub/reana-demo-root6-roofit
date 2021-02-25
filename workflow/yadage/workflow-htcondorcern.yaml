@@ -35,6 +35,7 @@ stages:
           imagetag: '6.18.04'
           resources:
             - compute_backend: htcondorcern
+            - htcondor_max_runtime: espresso
   - name: fitdata
     dependencies: [gendata]
     scheduler:
@@ -57,3 +58,4 @@ stages:
           imagetag: '6.18.04'
           resources:
             - compute_backend: htcondorcern
+            - htcondor_max_runtime: espresso
