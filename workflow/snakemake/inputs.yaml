@@ -1,0 +1,5 @@
+events: 20000
+fitdata: code/fitdata.C
+gendata: code/gendata.C
+data: results/data.root
+plot: results/plot.png

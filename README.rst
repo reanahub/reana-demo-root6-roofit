@@ -112,11 +112,12 @@ For example:
     $ root -b -q 'fitdata.C("data.root","plot.png")'
     $ ls -l plot.png
 
-Note that you can also use `CWL <http://www.commonwl.org/v1.0/>`_ or `Yadage
-<https://github.com/diana-hep/yadage>`_ workflow specifications:
+Note that you can also use `CWL <http://www.commonwl.org/v1.0/>`_, `Yadage
+<https://github.com/diana-hep/yadage>`_ or `Snakemake <https://snakemake.github.io>`_ workflow specifications:
 
 - `workflow definition using CWL <workflow/cwl/workflow.cwl>`_
 - `workflow definition using Yadage <workflow/yadage/workflow.yaml>`_
+- `workflow definition using Snakemake <workflow/snakemake/Snakefile>`_
 
 5. Output results
 -----------------
@@ -164,8 +165,9 @@ workflow steps and expected outputs:
 
 In this example we are using a simple Serial workflow engine to represent our
 sequential computational workflow steps. Note that we can also use the CWL
-workflow specification (see `reana-cwl.yaml <reana-cwl.yaml>`_) or the Yadage
-workflow specification (see `reana-yadage.yaml <reana-yadage.yaml>`_).
+workflow specification (see `reana-cwl.yaml <reana-cwl.yaml>`_), the Yadage
+workflow specification (see `reana-yadage.yaml <reana-yadage.yaml>`_) or the
+Snakemake workflow specification (see `reana-snakemake.yaml <reana-snakemake.yaml>`_).
 
 We can now install the REANA command-line client, run the analysis and download the resulting plots:
 
