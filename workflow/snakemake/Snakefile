@@ -15,7 +15,6 @@ rule all:
     input:
         "results/data.root",
         "results/plot.png"
-        
 
 rule gendata:
     input:
@@ -23,22 +22,19 @@ rule gendata:
     output:
         "results/data.root"
     params:
-        events=config["events"],
-        data=config["data"]
+        events=config["events"]
     container:
         "reanahub/reana-env-root6:6.18.04"
     shell:
-        "mkdir -p results && root -b -q '{input.gendata_tool}({params.events},\"{params.data}\")'"
+        "mkdir -p results && root -b -q '{input.gendata_tool}({params.events},\"{output}\")'"
 
 rule fitdata:
     input:
-        fitdata_tool=config["fitdata"]
+        fitdata_tool=config["fitdata"],
+        data="results/data.root"
     output:
         "results/plot.png"
     container:
         "reanahub/reana-env-root6:6.18.04"
-    params:
-        data=config["data"],
-        plot=config["plot"]
-    shell: 
-        "root -b -q '{input.fitdata_tool}(\"{params.data}\",\"{params.plot}\")'"
+    shell:
+        "root -b -q '{input.fitdata_tool}(\"{input.data}\",\"{output}\")'"
