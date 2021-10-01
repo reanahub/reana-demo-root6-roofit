@@ -25,6 +25,8 @@ rule gendata:
         events=config["events"]
     container:
         "docker://reanahub/reana-env-root6:6.18.04"
+    resources:
+        kubernetes_memory_limit="64Mi"
     shell:
         "mkdir -p results && root -b -q '{input.gendata_tool}({params.events},\"{output}\")'"
 
@@ -36,5 +38,7 @@ rule fitdata:
         "results/plot.png"
     container:
         "docker://reanahub/reana-env-root6:6.18.04"
+    resources:
+        kubernetes_memory_limit="64Mi"
     shell:
         "root -b -q '{input.fitdata_tool}(\"{input.data}\",\"{output}\")'"

@@ -27,14 +27,23 @@ outputs:
 
 steps:
   gendata:
+    hints:
+      reana:
+        kubernetes_memory_limit: '64Mi'
     run: gendata.cwl
     in:
       gendata_tool: gendata_tool
       events: events
     out: [data]
   fitdata:
+    hints:
+      reana:
+        kubernetes_memory_limit: '64Mi'
     run: fitdata.cwl
     in:
       fitdata: fitdata_tool
       data: gendata/data
     out: [result]
+
+$namespaces:
+  reana: https://www.reana.io

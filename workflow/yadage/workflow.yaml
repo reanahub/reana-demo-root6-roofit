@@ -33,6 +33,8 @@ stages:
           environment_type: 'docker-encapsulated'
           image: 'reanahub/reana-env-root6'
           imagetag: '6.18.04'
+          resources:
+            - kubernetes_memory_limit: '64Mi'
   - name: fitdata
     dependencies: [gendata]
     scheduler:
@@ -53,3 +55,5 @@ stages:
           environment_type: 'docker-encapsulated'
           image: 'reanahub/reana-env-root6'
           imagetag: '6.18.04'
+          resources:
+            - kubernetes_memory_limit: '64Mi'
