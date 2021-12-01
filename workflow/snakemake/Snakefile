@@ -26,7 +26,7 @@ rule gendata:
     container:
         "docker://reanahub/reana-env-root6:6.18.04"
     resources:
-        kubernetes_memory_limit="64Mi"
+        kubernetes_memory_limit="256Mi"
     shell:
         "mkdir -p results && root -b -q '{input.gendata_tool}({params.events},\"{output}\")'"
 
@@ -39,6 +39,6 @@ rule fitdata:
     container:
         "docker://reanahub/reana-env-root6:6.18.04"
     resources:
-        kubernetes_memory_limit="64Mi"
+        kubernetes_memory_limit="256Mi"
     shell:
         "root -b -q '{input.fitdata_tool}(\"{input.data}\",\"{output}\")'"

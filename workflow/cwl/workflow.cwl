@@ -29,7 +29,7 @@ steps:
   gendata:
     hints:
       reana:
-        kubernetes_memory_limit: '64Mi'
+        kubernetes_memory_limit: '256Mi'
     run: gendata.cwl
     in:
       gendata_tool: gendata_tool
@@ -38,7 +38,7 @@ steps:
   fitdata:
     hints:
       reana:
-        kubernetes_memory_limit: '64Mi'
+        kubernetes_memory_limit: '256Mi'
     run: fitdata.cwl
     in:
       fitdata: fitdata_tool
