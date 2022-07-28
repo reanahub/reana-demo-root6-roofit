@@ -38,18 +38,18 @@ void fitdata(const char* input, const char* output)
 
   // Overlay the background components of model with a dotted line
   //model->plotOn(xframe,Components(RooArgSet("bkg")),LineStyle(kDotted),Normalization(1.0,RooAbsReal::RelativeExpected)) ;
-  
+
   // Print structure of composite p.d.f.
   //model.Print("t") ;
  // Draw the frame on the canvas
   TCanvas res("rf202_composite","rf202_composite",600,600) ;
-  gPad->SetLeftMargin(0.15) ; 
-  xframe->GetYaxis()->SetTitleOffset(1.4) ; 
+  gPad->SetLeftMargin(0.15) ;
+  xframe->GetYaxis()->SetTitleOffset(1.4) ;
   xframe->Draw();
 
   res.Update();
   res.SaveAs(output);
   res.Close();
-  
-  
+
+
 }

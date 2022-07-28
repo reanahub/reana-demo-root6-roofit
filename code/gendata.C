@@ -22,10 +22,10 @@ void gendata(int numevents, const char* outfilename)
   RooRealVar sigma1("sigma1","width of gaussians",0.5) ;
   // RooRealVar sigma2("sigma2","width of gaussians",1) ;
 
-  RooGaussian sig1("sig1","Signal component 1",x,mean,sigma1) ;  
-  //RooGaussian sig2("sig2","Signal component 2",x,mean,sigma2) ;  
-  
-  // Build Chebychev polynomial p.d.f.  
+  RooGaussian sig1("sig1","Signal component 1",x,mean,sigma1) ;
+  //RooGaussian sig2("sig2","Signal component 2",x,mean,sigma2) ;
+
+  // Build Chebychev polynomial p.d.f.
   RooRealVar a0("a0","a0",0.5,0.,1.) ;
   RooRealVar a1("a1","a1",-0.2,0.,1.) ;
   RooChebychev bkg("bkg","Background",x,RooArgSet(a0,a1)) ;
@@ -53,5 +53,5 @@ void gendata(int numevents, const char* outfilename)
   w->writeToFile(outfilename) ;
   // Workspace will remain in memory after macro finishes
   gDirectory->Add(w) ;
-  
+
 }
