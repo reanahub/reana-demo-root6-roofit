@@ -46,15 +46,15 @@ The analysis will consist of two stages. In the first stage, signal and
 background are generated. In the second stage, a fit will be made for the signal
 and background.
 
-For the first generation stage, `gendata.C <gendata.C>`_ is a ROOT macro that
-generates signal and background data.
+For the first generation stage, `gendata.C <code/gendata.C>`_ is a ROOT macro
+that generates signal and background data.
 
-For the second fitting stage, `fitdata.C <fitdata.C>`_ is a ROOT macro that
-makes a fit for the signal and the background data.
+For the second fitting stage, `fitdata.C <code/fitdata.C>`_ is a ROOT macro
+that makes a fit for the signal and the background data.
 
 The code was taken from the RooFit tutorial `rf502_wspacewrite.C
-<https://root.cern.ch/root/html/tutorials/roofit/rf502_wspacewrite.C.html>`_ and
-was slightly modified.
+<https://root.cern/doc/master/rf502__wspacewrite_8C.html>`_ and was slightly
+modified.
 
 3. Compute environment
 ----------------------
