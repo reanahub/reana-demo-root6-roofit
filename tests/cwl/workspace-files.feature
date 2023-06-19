@@ -1,0 +1,24 @@
+# Tests for the presence of the expected workflow files
+
+Feature: Workspace files
+
+    As a researcher,
+    I want to make sure that my CWL workflow produces expected files,
+    so that I can be sure that the workflow outputs are correct.
+
+    Scenario: The workspace contains the expected input files
+        When the workflow is finished
+        Then the workspace should include "code/gendata.C"
+        And the workspace should include "code/fitdata.C"
+
+    Scenario: The workflow generates the final plot
+        When the workflow is finished
+        Then the workspace should contain "outputs/plot.png"
+        And the sha256 checksum of the file "outputs/plot.png" should be "54165023803ce58f962816c47fe597c5df2cf24c26fa4821bb5e96f7d1b68d0b"
+        And all the outputs should be included in the workspace
+
+    Scenario: The total workspace size remains within reasonable limits
+        When the workflow is finished
+        Then the workspace size should be more than 20KiB
+        And the workspace size should be less than 200KiB
+

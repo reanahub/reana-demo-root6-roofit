@@ -1,14 +1,10 @@
-# This file is part of REANA.
-# Copyright (C) 2023 CERN.
-#
-# REANA is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
+# Tests for the presence of the expected workflow files
 
 Feature: Workspace files
 
     As a researcher,
-    I want to make sure that the workflow produces expected files in the workspace,
-    So that I can be sure that the workflow outputs are correct.
+    I want to make sure that my serial workflow produces expected files,
+    so that I can be sure that the workflow outputs are correct.
 
     Scenario: The workspace contains the expected input files
         When the workflow is finished

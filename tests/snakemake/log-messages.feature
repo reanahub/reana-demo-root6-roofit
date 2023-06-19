@@ -1,20 +1,16 @@
-# This file is part of REANA.
-# Copyright (C) 2023 CERN.
-#
-# REANA is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
+# Tests for the expected log messages
 
 Feature: Log messages
 
     As a researcher,
     I want to be able to see the log messages of my workflow execution,
-    So that I can verify that my workflow jobs ran correctly.
+    So that I can verify that the workflow ran correctly.
 
-    Scenario: The workflow engine produces expected messages
+    Scenario: The workflow start has produced the expected messages
         When the workflow is finished
-        Then the engine logs should contain "Publishing step:0, cmd: mkdir -p results && root -b -q"
+        Then the engine logs should contain "snakemake.logging | MainThread | WARNING | Building DAG of jobs..."
 
-    Scenario: The generation step produces expected messages
+    Scenario: The generation step has produced the expected messages
         When the workflow is finished
         Then the job logs for the "gendata" step should contain
             """
@@ -29,6 +25,10 @@ Feature: Log messages
             RooDataSet::modelData(x)
             """
 
-    Scenario: The fitting step produces expected messages
+    Scenario: The fitting step has produced the expected messages
         When the workflow is finished
         Then the job logs for the "fitdata" step should contain "MIGRAD MINIMIZATION HAS CONVERGED."
+
+    Scenario: The workflow completion has produced the expected messages
+        When the workflow is finished
+        Then the engine logs should contain "snakemake.logging | MainThread | INFO | 3 of 3 steps (100%) done"
