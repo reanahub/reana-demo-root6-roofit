@@ -241,6 +241,7 @@ The list of contributors in alphabetical order:
 - `Daniel Prelipcean <https://orcid.org/0000-0002-4855-194X>`_
 - `Diego Rodriguez <https://orcid.org/0000-0003-0649-2002>`_
 - `Dinos Kousidis <https://orcid.org/0000-0002-4914-4289>`_
+- `Giuseppe Steduto <https://orcid.org/0009-0002-1258-8553>`_
 - `Lukas Heinrich <https://orcid.org/0000-0002-4048-7584>`_
 - `Marco Vidal <https://orcid.org/0000-0002-9363-4971>`_
 - `Rokas Maciulaitis <https://orcid.org/0000-0003-1064-6967>`_
