@@ -12,13 +12,13 @@ workflow:
   specification:
     steps:
       - name: gendata
-        environment: 'reanahub/reana-env-root6:6.18.04'
+        environment: 'docker.io/reanahub/reana-env-root6:6.18.04'
         compute_backend: htcondorcern
         htcondor_max_runtime: espresso
         commands:
         - mkdir -p results && root -b -q 'code/gendata.C(${events},"${data}")'
       - name: fitdata
-        environment: 'reanahub/reana-env-root6:6.18.04'
+        environment: 'docker.io/reanahub/reana-env-root6:6.18.04'
         compute_backend: htcondorcern
         htcondor_max_runtime: espresso
         commands:

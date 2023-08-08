@@ -31,7 +31,7 @@ stages:
             data: outfilename
         environment:
           environment_type: 'docker-encapsulated'
-          image: 'reanahub/reana-env-root6'
+          image: 'docker.io/reanahub/reana-env-root6'
           imagetag: '6.18.04'
           resources:
             - kubernetes_memory_limit: '256Mi'
@@ -53,7 +53,7 @@ stages:
             plot: outfile
         environment:
           environment_type: 'docker-encapsulated'
-          image: 'reanahub/reana-env-root6'
+          image: 'docker.io/reanahub/reana-env-root6'
           imagetag: '6.18.04'
           resources:
             - kubernetes_memory_limit: '256Mi'

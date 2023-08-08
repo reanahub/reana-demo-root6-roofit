@@ -184,11 +184,11 @@ workflow steps and expected outputs:
       specification:
         steps:
           - name: gendata
-            environment: 'reanahub/reana-env-root6:6.18.04'
+            environment: 'docker.io/reanahub/reana-env-root6:6.18.04'
             commands:
             - mkdir -p results && root -b -q 'code/gendata.C(${events},"${data}")'
           - name: fitdata
-            environment: 'reanahub/reana-env-root6:6.18.04'
+            environment: 'docker.io/reanahub/reana-env-root6:6.18.04'
             commands:
             - root -b -q 'code/fitdata.C("${data}","${plot}")'
     outputs:
