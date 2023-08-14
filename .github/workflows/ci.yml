@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Validate CWL spec
         uses: reanahub/reana-github-actions/local-validate@v1
@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Run CWL locally
         uses: reanahub/reana-github-actions/local-run@v1
         with:
@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Validate serial spec
         uses: reanahub/reana-github-actions/local-validate@v1
@@ -55,7 +55,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Run Serial locally
         uses: reanahub/reana-github-actions/local-run@v1
         with:
@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Validate Snakemake spec
         uses: reanahub/reana-github-actions/local-validate@v1
@@ -85,7 +85,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Run Snakemake locally
         uses: reanahub/reana-github-actions/local-run@v1
         with:
@@ -105,7 +105,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Validate Yadage spec
         uses: reanahub/reana-github-actions/local-validate@v1
@@ -116,7 +116,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Run Yadage locally
         uses: reanahub/reana-github-actions/local-run@v1
         with:
