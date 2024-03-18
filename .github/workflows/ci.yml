@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Runs shell script static analysis
         run: |
@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Validate CWL spec
         uses: reanahub/reana-github-actions/local-validate@v1
@@ -65,7 +65,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Run CWL locally
         uses: reanahub/reana-github-actions/local-run@v1
         with:
@@ -81,7 +81,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Validate serial spec
         uses: reanahub/reana-github-actions/local-validate@v1
@@ -92,7 +92,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Run Serial locally
         uses: reanahub/reana-github-actions/local-run@v1
         with:
@@ -111,7 +111,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Validate Snakemake spec
         uses: reanahub/reana-github-actions/local-validate@v1
@@ -122,7 +122,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Run Snakemake locally
         uses: reanahub/reana-github-actions/local-run@v1
         with:
@@ -142,7 +142,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Validate Yadage spec
         uses: reanahub/reana-github-actions/local-validate@v1
@@ -153,7 +153,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Run Yadage locally
         uses: reanahub/reana-github-actions/local-run@v1
         with:
