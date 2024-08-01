@@ -13,3 +13,8 @@ workflow:
 outputs:
   files:
     - outputs/plot.png
+tests:
+  files:
+    - tests/cwl/log-messages.feature
+    - tests/cwl/run-duration.feature
+    - tests/cwl/workspace-files.feature
