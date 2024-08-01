@@ -24,3 +24,8 @@ workflow:
 outputs:
   files:
     - results/plot.png
+tests:
+  files:
+    - tests/serial/log-messages.feature
+    - tests/serial/run-duration.feature
+    - tests/serial/workspace-files.feature

@@ -2,6 +2,7 @@
 
 The list of contributors in alphabetical order:
 
+- [Alastair Lyall](https://orcid.org/0009-0000-4955-8935)
 - [Ana Trisovic](https://orcid.org/0000-0003-1991-0533)
 - [Anton Khodak](https://orcid.org/0000-0003-3263-4553)
 - [Audrius Mecionis](https://orcid.org/0000-0002-3759-1663)
