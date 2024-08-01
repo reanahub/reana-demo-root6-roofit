@@ -13,3 +13,8 @@ workflow:
 outputs:
   files:
     - results/plot.png
+tests:
+  files:
+    - tests/snakemake/log-messages.feature
+    - tests/snakemake/run-duration.feature
+    - tests/snakemake/workspace-files.feature
