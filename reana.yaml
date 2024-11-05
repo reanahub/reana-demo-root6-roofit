@@ -1,31 +1,15 @@
-version: 0.6.0
+version: 0.8.0
 inputs:
   files:
-    - code/gendata.C
-    - code/fitdata.C
+    - gendata.C
+    - fitdata.C
+    - Snakefile
+    - inputs.yaml
   parameters:
-    events: 20000
-    data: results/data.root
-    plot: results/plot.png
+    input: inputs.yaml
 workflow:
-  type: serial
-  specification:
-    steps:
-      - name: gendata
-        environment: 'docker.io/reanahub/reana-env-root6:6.18.04'
-        kubernetes_memory_limit: '256Mi'
-        commands:
-        - mkdir -p results && root -b -q 'code/gendata.C(${events},"${data}")'
-      - name: fitdata
-        environment: 'docker.io/reanahub/reana-env-root6:6.18.04'
-        kubernetes_memory_limit: '256Mi'
-        commands:
-        - root -b -q 'code/fitdata.C("${data}","${plot}")'
+  type: snakemake
+  file: Snakefile
 outputs:
   files:
     - results/plot.png
-tests:
-  files:
-    - tests/serial/log-messages.feature
-    - tests/serial/run-duration.feature
-    - tests/serial/workspace-files.feature

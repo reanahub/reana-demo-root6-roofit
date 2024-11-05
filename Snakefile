@@ -6,9 +6,8 @@
 #   $ virtualenv ~/.virtualenvs/root6-roofit-snakemake
 #   $ source ~/.virtualenvs/root6-roofit-snakemake/bin/activate
 #   $ pip install snakemake
-#   $ cp -a ../code .
-#   $ snakemake -s ../workflow/snakemake/Snakefile \
-#               --configfile ../workflow/snakemake/inputs.yaml -p --cores 1
+#   $ cp -a ../fitdata.C ../gendata.C ./
+#   $ snakemake -s ../Snakefile --configfile ../inputs.yaml -p --cores 1
 #   $ open results/plot.png
 
 rule all:
