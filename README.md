@@ -3,7 +3,6 @@
 [![image](https://github.com/reanahub/reana-demo-root6-roofit/workflows/CI/badge.svg)](https://github.com/reanahub/reana-demo-root6-roofit/actions)
 [![image](https://img.shields.io/badge/discourse-forum-blue.svg)](https://forum.reana.io)
 [![image](https://img.shields.io/github/license/reanahub/reana-demo-root6-roofit.svg)](https://github.com/reanahub/reana-demo-root6-roofit/blob/master/LICENSE)
-[![image](https://www.reana.io/static/img/badges/launch-on-reana-at-cern.svg)](https://reana.cern.ch/launch?url=https%3A%2F%2Fgithub.com%2Freanahub%2Freana-demo-root6-roofit&specification=reana.yaml&name=reana-demo-root6-roofit)
 
 ## About
 
@@ -31,10 +30,10 @@ there is no explicit input file to be taken care of.
 The analysis will consist of two stages. In the first stage, signal and background are
 generated. In the second stage, a fit will be made for the signal and background.
 
-For the first generation stage, [gendata.C](code/gendata.C) is a ROOT macro that
+For the first generation stage, [gendata.C](gendata.C) is a ROOT macro that
 generates signal and background data.
 
-For the second fitting stage, [fitdata.C](code/fitdata.C) is a ROOT macro that makes a
+For the second fitting stage, [fitdata.C](fitdata.C) is a ROOT macro that makes a
 fit for the signal and the background data.
 
 The code was taken from the RooFit tutorial
@@ -97,13 +96,7 @@ $ root -b -q 'fitdata.C("data.root","plot.png")'
 $ ls -l plot.png
 ```
 
-Note that you can also use [CWL](http://www.commonwl.org/v1.0/),
-[Yadage](https://github.com/diana-hep/yadage) or [Snakemake](https://snakemake.github.io)
-workflow specifications:
-
-- [workflow definition using CWL](workflow/cwl/workflow.cwl)
-- [workflow definition using Yadage](workflow/yadage/workflow.yaml)
-- [workflow definition using Snakemake](workflow/snakemake/Snakefile)
+The workflow steps are defined using the Snakemake, see [Snakefile](Snakefile).
 
 ### 5. Output results
 
@@ -114,60 +107,27 @@ model:
 
 ## Running the example on REANA cloud
 
-There are two ways to execute this analysis example on REANA.
-
-If you would like to simply launch this analysis example on the REANA instance at CERN
-and inspect its results using the web interface, please click on one of the following
-badges, depending on which workflow system (CWL, Serial, Snakemake, Yadage) you would
-like to use:
-
-[![Launch with CWL on REANA@CERN badge](https://www.reana.io/static/img/badges/launch-with-cwl-on-reana-at-cern.svg)](https://reana.cern.ch/launch?url=https%3A%2F%2Fgithub.com%2Freanahub%2Freana-demo-root6-roofit&specification=reana-cwl.yaml&name=reana-demo-root6-roofit-cwl)
-
-[![Launch with Serial on REANA@CERN badge](https://www.reana.io/static/img/badges/launch-with-serial-on-reana-at-cern.svg)](https://reana.cern.ch/launch?url=https%3A%2F%2Fgithub.com%2Freanahub%2Freana-demo-root6-roofit&specification=reana.yaml&name=reana-demo-root6-roofit-serial)
-
-[![Launch with Snakemake on REANA@CERN badge](https://www.reana.io/static/img/badges/launch-with-snakemake-on-reana-at-cern.svg)](https://reana.cern.ch/launch?url=https%3A%2F%2Fgithub.com%2Freanahub%2Freana-demo-root6-roofit&specification=reana-snakemake.yaml&name=reana-demo-root6-roofit-snakemake)
-
-[![Launch with Yadage on REANA@CERN badge](https://www.reana.io/static/img/badges/launch-with-yadage-on-reana-at-cern.svg)](https://reana.cern.ch/launch?url=https%3A%2F%2Fgithub.com%2Freanahub%2Freana-demo-root6-roofit&specification=reana-yadage.yaml&name=reana-demo-root6-roofit-yadage)
-
-If you would like a step-by-step guide on how to use the REANA command-line client to
-launch this analysis example, please read on.
-
 We start by creating a [reana.yaml](reana.yaml) file describing the above analysis
 structure with its inputs, code, runtime environment, computational workflow steps and
 expected outputs:
 
 ```yaml
-version: 0.6.0
+version: 0.8.0
 inputs:
   files:
-    - code/gendata.C
-    - code/fitdata.C
+    - gendata.C
+    - fitdata.C
+    - Snakefile
+    - inputs.yaml
   parameters:
-    events: 20000
-    data: results/data.root
-    plot: results/plot.png
+    input: inputs.yaml
 workflow:
-  type: serial
-  specification:
-    steps:
-      - name: gendata
-        environment: 'docker.io/reanahub/reana-env-root6:6.18.04'
-        commands:
-        - mkdir -p results && root -b -q 'code/gendata.C(${events},"${data}")'
-      - name: fitdata
-        environment: 'docker.io/reanahub/reana-env-root6:6.18.04'
-        commands:
-        - root -b -q 'code/fitdata.C("${data}","${plot}")'
+  type: snakemake
+  file: Snakefile
 outputs:
   files:
     - results/plot.png
 ```
-
-In this example we are using a simple Serial workflow engine to represent our sequential
-computational workflow steps. Note that we can also use the CWL workflow specification
-(see [reana-cwl.yaml](reana-cwl.yaml)), the Yadage workflow specification (see
-[reana-yadage.yaml](reana-yadage.yaml)) or the Snakemake workflow specification (see
-[reana-snakemake.yaml](reana-snakemake.yaml)).
 
 We can now install the REANA command-line client, run the analysis and download the
 resulting plots:
