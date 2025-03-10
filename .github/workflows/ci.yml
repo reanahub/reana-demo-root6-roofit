@@ -4,15 +4,40 @@
 # REANA is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
-name: CI
+name: ci
 
 on:
   push:
   pull_request:
   schedule:
-    - cron: '0 7 * * 1'
+    - cron: "0 7 * * 1"
 
 jobs:
+  format-prettier:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+
+      - name: Check Prettier code fomatting
+        run: |
+          npm install prettier --global
+          ./run-tests.sh --check-prettier
+
+  format-shfmt:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check shell script code fomatting
+        run: |
+          sudo apt-get install shfmt
+          ./run-tests.sh --check-shfmt
+
   lint-commitlint:
     runs-on: ubuntu-24.04
     steps:
@@ -39,6 +64,20 @@ jobs:
         run: |
           ./run-tests.sh --check-commitlint ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} ${{ github.event.pull_request.number }}
 
+  lint-markdownlint:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+
+      - name: Lint Markdown files
+        run: |
+          npm install markdownlint-cli2 --global
+          ./run-tests.sh --check-markdownlint
+
   lint-shellcheck:
     runs-on: ubuntu-24.04
     steps:
@@ -49,6 +88,24 @@ jobs:
         run: |
           sudo apt-get install shellcheck
           ./run-tests.sh --check-shellcheck
+
+  lint-yamllint:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Lint YAML files
+        run: |
+          pip install yamllint
+          ./run-tests.sh --check-yamllint
 
   cwl-validate:
     runs-on: ubuntu-24.04

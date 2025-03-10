@@ -9,7 +9,7 @@
 set -o errexit
 set -o nounset
 
-check_commitlint () {
+check_commitlint() {
     from=${2:-master}
     to=${3:-HEAD}
     pr=${4:-[0-9]+}
@@ -31,7 +31,7 @@ check_commitlint () {
         # (iii) check absence of merge commits in feature branches
         if [ "$commit_number_of_parents" -gt 1 ]; then
             if echo "$commit_title" | grep -qP "^chore\(.*\): merge "; then
-                break  # skip checking maint-to-master merge commits
+                break # skip checking maint-to-master merge commits
             else
                 echo "✖   Merge commits are not allowed in feature branches: $commit_title"
                 found=1
@@ -43,13 +43,33 @@ check_commitlint () {
     fi
 }
 
-check_shellcheck () {
+check_markdownlint() {
+    markdownlint-cli2 "**/*.md"
+}
+
+check_prettier() {
+    prettier -c .
+}
+
+check_shellcheck() {
     find . -name "*.sh" -exec shellcheck {} \+
 }
 
-check_all () {
+check_shfmt() {
+    shfmt -d .
+}
+
+check_yamllint() {
+    yamllint .
+}
+
+check_all() {
     check_commitlint
+    check_markdownlint
+    check_prettier
     check_shellcheck
+    check_shfmt
+    check_yamllint
 }
 
 if [ $# -eq 0 ]; then
@@ -59,7 +79,11 @@ fi
 
 arg="$1"
 case $arg in
-    --check-commitlint) check_commitlint "$@";;
-    --check-shellcheck) check_shellcheck;;
-    *) echo "[ERROR] Invalid argument '$arg'. Exiting." && exit 1;;
+--check-commitlint) check_commitlint "$@" ;;
+--check-markdownlint) check_markdownlint ;;
+--check-prettier) check_prettier ;;
+--check-shellcheck) check_shellcheck ;;
+--check-shfmt) check_shfmt ;;
+--check-yamllint) check_yamllint ;;
+*) echo "[ERROR] Invalid argument '$arg'. Exiting." && exit 1 ;;
 esac
