@@ -48,7 +48,7 @@ In order to be able to rerun the analysis even several years in the future, we n
 analysis is using. We shall achieve this by preparing a [Docker](https://www.docker.com/)
 container image for our analysis steps.
 
-This analysis example is runs within the [ROOT6](https://root.cern.ch/) analysis
+This analysis example runs within the [ROOT6](https://root.cern.ch/) analysis
 framework. The computing environment can be therefore easily encapsulated by using the
 upstream [reana-env-root6](https://github.com/reanahub/reana-env-root6) base image. (See
 there how it was created.)
