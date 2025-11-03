@@ -1,4 +1,3 @@
-version: 0.8.0
 inputs:
   files:
     - gendata.C

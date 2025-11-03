@@ -6,19 +6,20 @@
 
 ## About
 
-This [REANA](http://www.reana.io/) reproducible analysis example emulates a typical
-particle physics analysis where the signal and background data is processed and fitted
-against a model. The example will use the [RooFit](https://root.cern.ch/roofit) package
-of the [ROOT](https://root.cern.ch/) framework.
+This [REANA](http://www.reana.io/) reproducible analysis example emulates a
+typical particle physics analysis where the signal and background data is
+processed and fitted against a model. The example will use the
+[RooFit](https://root.cern.ch/roofit) package of the
+[ROOT](https://root.cern.ch/) framework.
 
 ## Analysis structure
 
-Making a research data analysis reproducible basically means to provide "runnable
-recipes" addressing (1) where is the input data, (2) what software was used to analyse
-the data, (3) which computing environments were used to run the software and (4) which
-computational workflow steps were taken to run the analysis. This will permit to
-instantiate the analysis on the computational cloud and run the analysis to obtain (5)
-output results.
+Making a research data analysis reproducible basically means to provide
+"runnable recipes" addressing (1) where is the input data, (2) what software
+was used to analyse the data, (3) which computing environments were used to run
+the software and (4) which computational workflow steps were taken to run the
+analysis. This will permit to instantiate the analysis on the computational
+cloud and run the analysis to obtain (5) output results.
 
 ### 1. Input data
 
@@ -27,38 +28,40 @@ there is no explicit input file to be taken care of.
 
 ### 2. Analysis code
 
-The analysis will consist of two stages. In the first stage, signal and background are
-generated. In the second stage, a fit will be made for the signal and background.
+The analysis will consist of two stages. In the first stage, signal and
+background are generated. In the second stage, a fit will be made for the
+signal and background.
 
 For the first generation stage, [gendata.C](gendata.C) is a ROOT macro that
 generates signal and background data.
 
-For the second fitting stage, [fitdata.C](fitdata.C) is a ROOT macro that makes a
-fit for the signal and the background data.
+For the second fitting stage, [fitdata.C](fitdata.C) is a ROOT macro that makes
+a fit for the signal and the background data.
 
 The code was taken from the RooFit tutorial
-[rf502_wspacewrite.C](https://root.cern/doc/master/rf502__wspacewrite_8C.html) and was
-slightly modified.
+[rf502_wspacewrite.C](https://root.cern/doc/master/rf502__wspacewrite_8C.html)
+and was slightly modified.
 
 ### 3. Compute environment
 
-In order to be able to rerun the analysis even several years in the future, we need to
-"encapsulate the current compute environment", for example to freeze the ROOT version our
-analysis is using. We shall achieve this by preparing a [Docker](https://www.docker.com/)
-container image for our analysis steps.
+In order to be able to rerun the analysis even several years in the future, we
+need to "encapsulate the current compute environment", for example to freeze
+the ROOT version our analysis is using. We shall achieve this by preparing a
+[Docker](https://www.docker.com/) container image for our analysis steps.
 
-This analysis example is runs within the [ROOT6](https://root.cern.ch/) analysis
-framework. The computing environment can be therefore easily encapsulated by using the
-upstream [reana-env-root6](https://github.com/reanahub/reana-env-root6) base image. (See
+This analysis example is runs within the [ROOT6](https://root.cern.ch/)
+analysis framework. The computing environment can be therefore easily
+encapsulated by using the upstream
+[reana-env-root6](https://github.com/reanahub/reana-env-root6) base image. (See
 there how it was created.)
 
-We shall use the ROOT version 6.18.04. Note that we can actually use this container image
-"as is", because our two macros `gendata.C` and `fitdata.C` can be "uploaded" and
-"mounted" into the running container at runtime. There is no need to compile any of the
-analysis source code beforehand. We can therefore use the ROOT 6.18.04 base image
-directly, without building a new container image specially dedicated to our analysis. The
-ROOT 6.18.04 base image fully specifies the complete analysis environment that we need
-for our analysis.
+We shall use the ROOT version 6.18.04. Note that we can actually use this
+container image "as is", because our two macros `gendata.C` and `fitdata.C` can
+be "uploaded" and "mounted" into the running container at runtime. There is no
+need to compile any of the analysis source code beforehand. We can therefore
+use the ROOT 6.18.04 base image directly, without building a new container
+image specially dedicated to our analysis. The ROOT 6.18.04 base image fully
+specifies the complete analysis environment that we need for our analysis.
 
 ### 4. Analysis workflow
 
@@ -91,28 +94,27 @@ The analysis workflow is simple and consists of two above-mentioned stages:
 For example:
 
 ```console
-$ root -b -q 'gendata.C(20000,"data.root")'
-$ root -b -q 'fitdata.C("data.root","plot.png")'
-$ ls -l plot.png
+root -b -q 'gendata.C(20000,"data.root")'
+root -b -q 'fitdata.C("data.root","plot.png")'
+ls -l plot.png
 ```
 
 The workflow steps are defined using the Snakemake, see [Snakefile](Snakefile).
 
 ### 5. Output results
 
-The example produces a plot where the signal and background data is fitted against the
-model:
+The example produces a plot where the signal and background data is fitted
+against the model:
 
-![](https://raw.githubusercontent.com/reanahub/reana-demo-root6-roofit/master/docs/plot.png)
+![plot](https://raw.githubusercontent.com/reanahub/reana-demo-root6-roofit/master/docs/plot.png)
 
 ## Running the example on REANA cloud
 
-We start by creating a [reana.yaml](reana.yaml) file describing the above analysis
-structure with its inputs, code, runtime environment, computational workflow steps and
-expected outputs:
+We start by creating a [reana.yaml](reana.yaml) file describing the above
+analysis structure with its inputs, code, runtime environment, computational
+workflow steps and expected outputs:
 
 ```yaml
-version: 0.8.0
 inputs:
   files:
     - gendata.C
@@ -133,28 +135,29 @@ We can now install the REANA command-line client, run the analysis and download 
 resulting plots:
 
 ```console
-$ # create new virtual environment
-$ virtualenv ~/.virtualenvs/reana
-$ source ~/.virtualenvs/reana/bin/activate
-$ # install REANA client
-$ pip install reana-client
-$ # connect to some REANA cloud instance
-$ export REANA_SERVER_URL=https://reana.cern.ch/
-$ export REANA_ACCESS_TOKEN=XXXXXXX
-$ # create new workflow
-$ reana-client create -n myanalysis
-$ export REANA_WORKON=myanalysis
-$ # upload input code, data and workflow to the workspace
-$ reana-client upload
-$ # start computational workflow
-$ reana-client start
-$ # ... should be finished in about a minute
-$ reana-client status
-$ # list workspace files
-$ reana-client ls
-$ # download output results
-$ reana-client download
+# create new virtual environment
+virtualenv ~/.virtualenvs/reana
+source ~/.virtualenvs/reana/bin/activate
+# install REANA client
+pip install reana-client
+# connect to some REANA cloud instance
+export REANA_SERVER_URL=https://reana.cern.ch/
+export REANA_ACCESS_TOKEN=XXXXXXX
+# create new workflow
+reana-client create -n myanalysis
+export REANA_WORKON=myanalysis
+# upload input code, data and workflow to the workspace
+reana-client upload
+# start computational workflow
+reana-client start
+# ... should be finished in about a minute
+reana-client status
+# list workspace files
+reana-client ls
+# download output results
+reana-client download
 ```
 
-Please see the [REANA-Client](https://reana-client.readthedocs.io/) documentation for
-more detailed explanation of typical `reana-client` usage scenarios.
+Please see the [REANA-Client](https://reana-client.readthedocs.io/)
+documentation for more detailed explanation of typical `reana-client` usage
+scenarios.

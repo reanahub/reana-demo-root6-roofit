@@ -1,15 +1,3 @@
-# Note that if you are working on the analysis development locally, i.e. outside
-# of the REANA platform, you can proceed as follows:
-#
-#   $ mkdir snakemake-local-run
-#   $ cd snakemake-local-run
-#   $ virtualenv ~/.virtualenvs/root6-roofit-snakemake
-#   $ source ~/.virtualenvs/root6-roofit-snakemake/bin/activate
-#   $ pip install snakemake
-#   $ cp -a ../fitdata.C ../gendata.C ./
-#   $ snakemake -s ../Snakefile --configfile ../inputs.yaml -p --cores 1
-#   $ open results/plot.png
-
 rule all:
     input:
         "results/data.root",
@@ -17,7 +5,7 @@ rule all:
 
 rule gendata:
     input:
-        gendata_tool=config["gendata"]
+        macro="gendata.C"
     output:
         "results/data.root"
     params:
@@ -27,12 +15,12 @@ rule gendata:
     resources:
         kubernetes_memory_limit="256Mi"
     shell:
-        "mkdir -p results && root -b -q '{input.gendata_tool}({params.events},\"{output}\")'"
+        "mkdir -p results && root -b -q '{input.macro}({params.events},\"{output}\")'"
 
 rule fitdata:
     input:
-        fitdata_tool=config["fitdata"],
-        data="results/data.root"
+        data="results/data.root",
+        macro="fitdata.C"
     output:
         "results/plot.png"
     container:
@@ -40,4 +28,4 @@ rule fitdata:
     resources:
         kubernetes_memory_limit="256Mi"
     shell:
-        "root -b -q '{input.fitdata_tool}(\"{input.data}\",\"{output}\")'"
+        "root -b -q '{input.macro}(\"{input.data}\",\"{output}\")'"
