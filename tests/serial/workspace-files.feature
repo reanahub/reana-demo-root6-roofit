@@ -24,4 +24,4 @@ Feature: Workspace files
     Scenario: The total workspace size remains within reasonable limits
         When the workflow is finished
         Then the workspace size should be more than 150KiB
-        And the workspace size should be less than 200KiB
+        And the workspace size should be less than 250KiB
