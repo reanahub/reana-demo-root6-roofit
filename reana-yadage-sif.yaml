@@ -1,0 +1,33 @@
+# Demo: run a Yadage workflow whose environment is a Singularity/Apptainer
+# ``.sif`` image (instead of a Docker registry reference).
+#
+# Before running, build the image locally and upload it with the workflow:
+#
+#     apptainer build reana-env-root6.sif \
+#         docker://docker.io/reanahub/reana-env-root6:6.18.04
+#
+# The file is listed under ``inputs.files`` so ``reana-client upload`` copies it
+# into the workspace root, where the stages of
+# ``workflow/yadage/workflow-sif.yaml`` reference it as
+# ``reana-env-root6.sif``. (``*.sif`` is git-ignored so the binary is not
+# committed.)
+version: 0.6.0
+inputs:
+  files:
+    - code/gendata.C
+    - code/fitdata.C
+    - reana-env-root6.sif
+  directories:
+    - workflow/yadage
+  parameters:
+    events: 20000
+    gendata: code/gendata.C
+    fitdata: code/fitdata.C
+workflow:
+  type: yadage
+  file: workflow/yadage/workflow-sif.yaml
+  directories:
+    - workflow/yadage
+outputs:
+  files:
+    - fitdata/plot.png
