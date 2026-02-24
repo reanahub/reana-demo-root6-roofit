@@ -1,0 +1,34 @@
+# Container images are loaded from a SIF file uploaded to the workspace and
+# executed via Apptainer.
+
+rule all:
+    input:
+        "results/data.root",
+        "results/plot.png"
+
+rule gendata:
+    input:
+        gendata_tool=config["gendata"]
+    output:
+        "results/data.root"
+    params:
+        events=config["events"]
+    container:
+        "reana-env-root6.sif"
+    resources:
+        kubernetes_memory_limit="256Mi"
+    shell:
+        "mkdir -p results && root -b -q '{input.gendata_tool}({params.events},\"{output}\")'"
+
+rule fitdata:
+    input:
+        fitdata_tool=config["fitdata"],
+        data="results/data.root"
+    output:
+        "results/plot.png"
+    container:
+        "reana-env-root6.sif"
+    resources:
+        kubernetes_memory_limit="256Mi"
+    shell:
+        "root -b -q '{input.fitdata_tool}(\"{input.data}\",\"{output}\")'"

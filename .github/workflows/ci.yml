@@ -156,7 +156,9 @@ jobs:
       - name: Validate serial spec
         uses: reanahub/reana-github-actions/local-validate@v1
         with:
-          reana_specs: reana.yaml reana-htcondorcern.yaml reana-slurmcern.yaml
+          reana_specs:
+            reana.yaml reana-htcondorcern.yaml reana-slurmcern.yaml
+            reana-serial-cvmfs.yaml reana-serial-sif.yaml
 
   snakemake-local-run:
     runs-on: ubuntu-24.04
