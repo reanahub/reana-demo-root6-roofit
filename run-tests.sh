@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # This file is part of REANA.
-# Copyright (C) 2024 CERN.
+# Copyright (C) 2024, 2025, 2026 CERN.
 #
 # REANA is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -9,7 +9,7 @@
 set -o errexit
 set -o nounset
 
-check_commitlint () {
+lint_commitlint() {
     from=${2:-master}
     to=${3:-HEAD}
     pr=${4:-[0-9]+}
@@ -43,23 +43,34 @@ check_commitlint () {
     fi
 }
 
-check_shellcheck () {
+lint_shellcheck() {
     find . -name "*.sh" -exec shellcheck {} \+
 }
 
-check_all () {
-    check_commitlint
-    check_shellcheck
+all() {
+    lint_commitlint
+    lint_shellcheck
+}
+
+help() {
+    echo "Usage: $0 [options]"
+    echo "Options:"
+    echo "  --all              Perform all checks [default]"
+    echo "  --help             Display this help message"
+    echo "  --lint-commitlint  Check linting of commit messages"
+    echo "  --lint-shellcheck  Check linting of shell scripts"
 }
 
 if [ $# -eq 0 ]; then
-    check_all
+    all
     exit 0
 fi
 
 arg="$1"
 case $arg in
-    --check-commitlint) check_commitlint "$@";;
-    --check-shellcheck) check_shellcheck;;
-    *) echo "[ERROR] Invalid argument '$arg'. Exiting." && exit 1;;
+--all) all ;;
+--help) help ;;
+--lint-commitlint) lint_commitlint "$@" ;;
+--lint-shellcheck) lint_shellcheck ;;
+*) echo "[ERROR] Invalid argument '$arg'. Exiting." && help && exit 1 ;;
 esac
