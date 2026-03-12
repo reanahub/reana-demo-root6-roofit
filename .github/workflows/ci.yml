@@ -26,6 +26,17 @@ lint-yamllint:
           pip install yamllint
           ./run-tests.sh --lint-yamllint
 
+format-shfmt:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check shell script code formatting
+        run: |
+          sudo apt-get install shfmt
+          ./run-tests.sh --format-shfmt
+
   push:
   pull_request:
   schedule:
