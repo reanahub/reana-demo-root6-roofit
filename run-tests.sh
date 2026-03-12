@@ -47,6 +47,10 @@ lint_commitlint() {
     fi
 }
 
+lint_markdownlint() {
+    markdownlint-cli2 "**/*.md"
+}
+
 lint_shellcheck() {
     find . -name "*.sh" -exec shellcheck {} \+
 }
@@ -58,6 +62,7 @@ lint_yamllint() {
 all() {
     format_shfmt
     lint_commitlint
+    lint_markdownlint
     lint_shellcheck
     lint_yamllint
 }
@@ -65,12 +70,13 @@ all() {
 help() {
     echo "Usage: $0 [options]"
     echo "Options:"
-    echo "  --all              Perform all checks [default]"
-    echo "  --format-shfmt     Check formatting of shell scripts"
-    echo "  --help             Display this help message"
-    echo "  --lint-commitlint  Check linting of commit messages"
-    echo "  --lint-shellcheck  Check linting of shell scripts"
-    echo "  --lint-yamllint    Check linting of YAML files"
+    echo "  --all                Perform all checks [default]"
+    echo "  --format-shfmt       Check formatting of shell scripts"
+    echo "  --help               Display this help message"
+    echo "  --lint-commitlint    Check linting of commit messages"
+    echo "  --lint-markdownlint  Check linting of Markdown files"
+    echo "  --lint-shellcheck    Check linting of shell scripts"
+    echo "  --lint-yamllint      Check linting of YAML files"
 }
 
 if [ $# -eq 0 ]; then
@@ -84,6 +90,7 @@ case $arg in
 --help) help ;;
 --format-shfmt) format_shfmt ;;
 --lint-commitlint) lint_commitlint "$@" ;;
+--lint-markdownlint) lint_markdownlint ;;
 --lint-shellcheck) lint_shellcheck ;;
 --lint-yamllint) lint_yamllint ;;
 *) echo "[ERROR] Invalid argument '$arg'. Exiting." && help && exit 1 ;;

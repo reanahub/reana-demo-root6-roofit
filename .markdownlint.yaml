@@ -1,0 +1,6 @@
+# Allow long lines (to be fixed when prettier is added)
+MD013: false
+# Allow prompt dollar sign in console examples without showing output
+MD014: false
+# Allow flexible list spacing
+MD032: false
