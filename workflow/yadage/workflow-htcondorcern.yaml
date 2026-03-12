@@ -16,46 +16,46 @@ stages:
   - name: gendata
     dependencies: [init]
     scheduler:
-      scheduler_type: 'singlestep-stage'
+      scheduler_type: "singlestep-stage"
       parameters:
-        events: {step: init, output: events}
-        gendata: {step: init, output: gendata}
-        outfilename: '{workdir}/data.root'
+        events: { step: init, output: events }
+        gendata: { step: init, output: gendata }
+        outfilename: "{workdir}/data.root"
       step:
         process:
-          process_type: 'interpolated-script-cmd'
+          process_type: "interpolated-script-cmd"
           script: root -b -q '{gendata}({events},"{outfilename}")'
         publisher:
-          publisher_type: 'frompar-pub'
+          publisher_type: "frompar-pub"
           outputmap:
             data: outfilename
         environment:
-          environment_type: 'docker-encapsulated'
-          image: 'docker.io/reanahub/reana-env-root6'
-          imagetag: '6.18.04'
+          environment_type: "docker-encapsulated"
+          image: "docker.io/reanahub/reana-env-root6"
+          imagetag: "6.18.04"
           resources:
             - compute_backend: htcondorcern
             - htcondor_max_runtime: espresso
   - name: fitdata
     dependencies: [gendata]
     scheduler:
-      scheduler_type: 'singlestep-stage'
+      scheduler_type: "singlestep-stage"
       parameters:
-        fitdata: {step: init, output: fitdata}
-        data: {step: gendata, output: data}
-        outfile: '{workdir}/plot.png'
+        fitdata: { step: init, output: fitdata }
+        data: { step: gendata, output: data }
+        outfile: "{workdir}/plot.png"
       step:
         process:
-          process_type: 'interpolated-script-cmd'
+          process_type: "interpolated-script-cmd"
           script: root -b -q '{fitdata}("{data}","{outfile}")'
         publisher:
-          publisher_type: 'frompar-pub'
+          publisher_type: "frompar-pub"
           outputmap:
             plot: outfile
         environment:
-          environment_type: 'docker-encapsulated'
-          image: 'docker.io/reanahub/reana-env-root6'
-          imagetag: '6.18.04'
+          environment_type: "docker-encapsulated"
+          image: "docker.io/reanahub/reana-env-root6"
+          imagetag: "6.18.04"
           resources:
             - compute_backend: htcondorcern
             - htcondor_max_runtime: espresso

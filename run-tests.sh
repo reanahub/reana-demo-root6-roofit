@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # This file is part of REANA.
-# Copyright (C) 2024 CERN.
+# Copyright (C) 2024, 2025, 2026 CERN.
 #
 # REANA is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
@@ -9,7 +9,15 @@
 set -o errexit
 set -o nounset
 
-check_commitlint () {
+format_prettier() {
+    prettier -c .
+}
+
+format_shfmt() {
+    shfmt -d .
+}
+
+lint_commitlint() {
     from=${2:-master}
     to=${3:-HEAD}
     pr=${4:-[0-9]+}
@@ -31,7 +39,7 @@ check_commitlint () {
         # (iii) check absence of merge commits in feature branches
         if [ "$commit_number_of_parents" -gt 1 ]; then
             if echo "$commit_title" | grep -qE "^chore\(.*\): merge "; then
-                break  # skip checking maint-to-master merge commits
+                break # skip checking maint-to-master merge commits
             else
                 echo "✖   Merge commits are not allowed in feature branches: $commit_title"
                 found=1
@@ -43,23 +51,54 @@ check_commitlint () {
     fi
 }
 
-check_shellcheck () {
+lint_markdownlint() {
+    markdownlint-cli2 "**/*.md"
+}
+
+lint_shellcheck() {
     find . -name "*.sh" -exec shellcheck {} \+
 }
 
-check_all () {
-    check_commitlint
-    check_shellcheck
+lint_yamllint() {
+    yamllint .
+}
+
+all() {
+    format_prettier
+    format_shfmt
+    lint_commitlint
+    lint_markdownlint
+    lint_shellcheck
+    lint_yamllint
+}
+
+help() {
+    echo "Usage: $0 [options]"
+    echo "Options:"
+    echo "  --all                Perform all checks [default]"
+    echo "  --format-prettier    Check formatting of Markdown etc files"
+    echo "  --format-shfmt       Check formatting of shell scripts"
+    echo "  --help               Display this help message"
+    echo "  --lint-commitlint    Check linting of commit messages"
+    echo "  --lint-markdownlint  Check linting of Markdown files"
+    echo "  --lint-shellcheck    Check linting of shell scripts"
+    echo "  --lint-yamllint      Check linting of YAML files"
 }
 
 if [ $# -eq 0 ]; then
-    check_all
+    all
     exit 0
 fi
 
 arg="$1"
 case $arg in
-    --check-commitlint) check_commitlint "$@";;
-    --check-shellcheck) check_shellcheck;;
-    *) echo "[ERROR] Invalid argument '$arg'. Exiting." && exit 1;;
+--all) all ;;
+--help) help ;;
+--format-prettier) format_prettier ;;
+--format-shfmt) format_shfmt ;;
+--lint-commitlint) lint_commitlint "$@" ;;
+--lint-markdownlint) lint_markdownlint ;;
+--lint-shellcheck) lint_shellcheck ;;
+--lint-yamllint) lint_yamllint ;;
+*) echo "[ERROR] Invalid argument '$arg'. Exiting." && help && exit 1 ;;
 esac

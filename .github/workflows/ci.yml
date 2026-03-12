@@ -1,18 +1,70 @@
 # This file is part of REANA.
-# Copyright (C) 2020, 2021, 2023, 2024 CERN.
+# Copyright (C) 2020, 2021, 2023, 2024, 2026 CERN.
 #
 # REANA is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
-name: CI
+name: ci
 
 on:
   push:
   pull_request:
   schedule:
-    - cron: '0 7 * * 1'
+    - cron: "0 7 * * 1"
 
 jobs:
+  cwl-local-run:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run CWL locally
+        uses: reanahub/reana-github-actions/local-run@v1
+        with:
+          commands: |
+            rm -rf cwl-local-run && mkdir -p cwl-local-run && cd cwl-local-run
+            pip install cwltool
+            cp -a ../code . && cp ../workflow/cwl/input.yml .
+            cwltool --quiet --outdir="./results" ../workflow/cwl/workflow.cwl input.yml
+            ls -l `pwd`/results/plot.png
+            cd .. && rm -rf cwl-local-run
+
+  cwl-validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate CWL spec
+        uses: reanahub/reana-github-actions/local-validate@v1
+        with:
+          reana_specs: reana-cwl*.yaml
+
+  format-prettier:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+
+      - name: Check Prettier code formatting
+        run: |
+          npm install prettier --global
+          ./run-tests.sh --format-prettier
+
+  format-shfmt:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check shell script code formatting
+        run: |
+          sudo apt-get install shfmt
+          ./run-tests.sh --format-shfmt
+
   lint-commitlint:
     runs-on: ubuntu-24.04
     steps:
@@ -32,12 +84,26 @@ jobs:
       - name: Check commit message compliance of the recently pushed commit
         if: github.event_name == 'push'
         run: |
-          ./run-tests.sh --check-commitlint HEAD~1 HEAD
+          ./run-tests.sh --lint-commitlint HEAD~1 HEAD
 
       - name: Check commit message compliance of the pull request
         if: github.event_name == 'pull_request'
         run: |
-          ./run-tests.sh --check-commitlint ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} ${{ github.event.pull_request.number }}
+          ./run-tests.sh --lint-commitlint ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} ${{ github.event.pull_request.number }}
+
+  lint-markdownlint:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+
+      - name: Lint Markdown files
+        run: |
+          npm install markdownlint-cli2 --global
+          ./run-tests.sh --lint-markdownlint
 
   lint-shellcheck:
     runs-on: ubuntu-24.04
@@ -48,45 +114,23 @@ jobs:
       - name: Runs shell script static analysis
         run: |
           sudo apt-get install shellcheck
-          ./run-tests.sh --check-shellcheck
+          ./run-tests.sh --lint-shellcheck
 
-  cwl-validate:
+  lint-yamllint:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validate CWL spec
-        uses: reanahub/reana-github-actions/local-validate@v1
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          reana_specs: reana-cwl*.yaml
+          python-version: "3.12"
 
-  cwl-local-run:
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Run CWL locally
-        uses: reanahub/reana-github-actions/local-run@v1
-        with:
-          commands: |
-            rm -rf cwl-local-run && mkdir -p cwl-local-run && cd cwl-local-run
-            pip install cwltool
-            cp -a ../code . && cp ../workflow/cwl/input.yml .
-            cwltool --quiet --outdir="./results" ../workflow/cwl/workflow.cwl input.yml
-            ls -l `pwd`/results/plot.png
-            cd .. && rm -rf cwl-local-run
-
-  serial-validate:
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Validate serial spec
-        uses: reanahub/reana-github-actions/local-validate@v1
-        with:
-          reana_specs: reana.yaml reana-htcondorcern.yaml reana-slurmcern.yaml
+      - name: Lint YAML files
+        run: |
+          pip install yamllint
+          ./run-tests.sh --lint-yamllint
 
   serial-local-run:
     runs-on: ubuntu-24.04
@@ -107,16 +151,16 @@ jobs:
               root -b -q './code/fitdata.C(\"./results/data.root\",\"./results/plot.png\")'"
              ls -l `pwd`/results/plot.png
 
-  snakemake-validate:
+  serial-validate:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validate Snakemake spec
+      - name: Validate serial spec
         uses: reanahub/reana-github-actions/local-validate@v1
         with:
-          reana_specs: reana-snakemake*.yaml
+          reana_specs: reana.yaml reana-htcondorcern.yaml reana-slurmcern.yaml
 
   snakemake-local-run:
     runs-on: ubuntu-24.04
@@ -144,16 +188,16 @@ jobs:
             ls -l `pwd`/results/plot.png
             cd .. && rm -rf snakemake-local-run
 
-  yadage-validate:
+  snakemake-validate:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validate Yadage spec
+      - name: Validate Snakemake spec
         uses: reanahub/reana-github-actions/local-validate@v1
         with:
-          reana_specs: reana-yadage*.yaml
+          reana_specs: reana-snakemake*.yaml
 
   yadage-local-run:
     runs-on: ubuntu-24.04
@@ -170,3 +214,14 @@ jobs:
             yadage-run . ../workflow/yadage/workflow.yaml -p events=20000 -p gendata=code/gendata.C -p fitdata=code/fitdata.C -d initdir=`pwd`/yadage-inputs
             ls -l `pwd`/fitdata/plot.png
             cd .. && rm -rf yadage-local-run
+
+  yadage-validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Yadage spec
+        uses: reanahub/reana-github-actions/local-validate@v1
+        with:
+          reana_specs: reana-yadage*.yaml

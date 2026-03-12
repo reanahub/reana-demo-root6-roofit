@@ -1,0 +1,8 @@
+# Allow long lines in code blocks and tables
+MD013:
+  code_blocks: false
+  tables: false
+# Allow prompt dollar sign in console examples without showing output
+MD014: false
+# Allow flexible list spacing
+MD032: false
