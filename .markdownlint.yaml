@@ -1,5 +1,7 @@
-# Allow long lines (to be fixed when prettier is added)
-MD013: false
+# Allow long lines in code blocks and tables
+MD013:
+  code_blocks: false
+  tables: false
 # Allow prompt dollar sign in console examples without showing output
 MD014: false
 # Allow flexible list spacing

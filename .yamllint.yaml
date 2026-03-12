@@ -1,6 +1,8 @@
 extends: default
 
 rules:
+  braces:
+    max-spaces-inside: 1
   comments:
     min-spaces-from-content: 1
   document-start: disable
