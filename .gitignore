@@ -1,1 +1,4 @@
 results/
+.idea
+.snakemake
+workflow/snakemake/.snakemake/log
