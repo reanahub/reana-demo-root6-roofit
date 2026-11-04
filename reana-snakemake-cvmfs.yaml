@@ -1,0 +1,17 @@
+# Requires CVMFS (cvmfs.cern.ch) to be available on the Kubernetes cluster.
+# Container images are loaded from /cvmfs/unpacked.cern.ch via Apptainer.
+version: 0.8.0
+inputs:
+  files:
+    - code/gendata.C
+    - code/fitdata.C
+  directories:
+    - workflow/snakemake
+  parameters:
+    input: workflow/snakemake/inputs.yaml
+workflow:
+  type: snakemake
+  file: workflow/snakemake/Snakefile-cvmfs
+outputs:
+  files:
+    - results/plot.png
