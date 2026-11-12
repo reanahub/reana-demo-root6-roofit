@@ -2,13 +2,11 @@ inputs:
   files:
     - gendata.C
     - fitdata.C
-    - Snakefile
-    - inputs.yaml
-  parameters:
-    input: inputs.yaml
 workflow:
   type: snakemake
   file: Snakefile
+  parameters:
+    file: inputs.yaml
 outputs:
   files:
     - results/plot.png

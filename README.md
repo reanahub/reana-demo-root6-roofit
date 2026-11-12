@@ -119,13 +119,11 @@ inputs:
   files:
     - gendata.C
     - fitdata.C
-    - Snakefile
-    - inputs.yaml
-  parameters:
-    input: inputs.yaml
 workflow:
   type: snakemake
   file: Snakefile
+  parameters:
+    file: inputs.yaml
 outputs:
   files:
     - results/plot.png
@@ -135,29 +133,23 @@ We can now install the REANA command-line client, run the analysis and download 
 resulting plots:
 
 ```console
-# create new virtual environment
-virtualenv ~/.virtualenvs/reana
-source ~/.virtualenvs/reana/bin/activate
-# install REANA client
-pip install reana-client
+# install REANA client (darwin/linux, amd64/arm64)
+curl -fL -o reana-client https://github.com/reanahub/reana-client-go/releases/download/v0.95.0-alpha.2/reana-client-go-v0.95.0-alpha.2-linux-amd64
+chmod u+x ./reana-client
 # connect to some REANA cloud instance
-export REANA_SERVER_URL=https://reana.cern.ch/
-export REANA_ACCESS_TOKEN=XXXXXXX
+./reana-client login --server https://reana-qa.cern.ch --callback-port 8899
 # create new workflow
-reana-client create -n myanalysis
-export REANA_WORKON=myanalysis
-# upload input code, data and workflow to the workspace
-reana-client upload
+./reana-client create -w myanalysis
+# upload input code and data to the remote workspace
+./reana-client upload -w myanalysis
 # start computational workflow
-reana-client start
-# ... should be finished in about a minute
-reana-client status
-# list workspace files
-reana-client ls
+./reana-client start -w myanalysis
+# check workflow run progress
+./reana-client status -w myanalysis
+# check workflow run logs
+./reana-client logs -w myanalysis
+# list remote workspace files
+./reana-client ls -w myanalysis
 # download output results
-reana-client download
+./reana-client download -w myanalysis
 ```
-
-Please see the [REANA-Client](https://reana-client.readthedocs.io/)
-documentation for more detailed explanation of typical `reana-client` usage
-scenarios.
