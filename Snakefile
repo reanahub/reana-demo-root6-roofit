@@ -1,6 +1,5 @@
 rule all:
     input:
-        "results/data.root",
         "results/plot.png"
 
 rule gendata:
