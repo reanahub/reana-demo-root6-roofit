@@ -10,7 +10,7 @@ rule gendata:
     params:
         events=config["events"]
     container:
-        "docker://docker.io/reanahub/reana-env-root6:6.18.04"
+        "docker://registry.cern.ch/docker.io/reanahub/reana-env-root6:6.18.04"
     resources:
         kubernetes_memory_limit="256Mi"
     shell:
@@ -23,7 +23,7 @@ rule fitdata:
     output:
         "results/plot.png"
     container:
-        "docker://docker.io/reanahub/reana-env-root6:6.18.04"
+        "docker://registry.cern.ch/docker.io/reanahub/reana-env-root6:6.18.04"
     resources:
         kubernetes_memory_limit="256Mi"
     shell:
