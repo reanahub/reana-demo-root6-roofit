@@ -129,8 +129,8 @@ outputs:
     - results/plot.png
 ```
 
-We can now install the REANA command-line client, run the analysis and download the
-resulting plots:
+We can now install the REANA command-line client, run the analysis and download
+the resulting plots:
 
 ```console
 # install REANA client (darwin/linux, amd64/arm64)
